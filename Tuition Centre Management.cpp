@@ -80,71 +80,8 @@ std::string stringinputfilter(const std::string& prompt) {
 	}
 }
 //----------------------------------------------------------------------
+// UserManagementModule
 
-int main() {
-
-}
-
-void UserManagement() {
-	User currentUser; //create a user based on the struct declared on models.h
-
-
-	int choice;
-	bool running = true; //set it to keep running until true become false
-	int status;
-	while (running) {
-		std::cout << "\n--- Welcome System --\n";
-		std::cout << "======================================\n1. Register\n2. Login\n0. Exit\n======================================\nPlease choose one option by typing the number\n";
-		choice = intgerinputfilter("Enter your choice: ");//call the input filter function to get the input and check if it is valid
-		if (choice == -1) {
-			std::cout << "Invalid input! Please enter a valid number\n";
-			continue;
-		}
-		if (choice == -2) {
-			std::cout << "Input cannot be empty! Please enter a valid number\n";
-			continue;
-		}
-
-		//switch here get result from the choice and entering it to case for different result
-		switch (choice) {
-		case 1:
-			registerUser(); //take result from auth.cpp and continue
-			break; //break means end this case and go back to the choice section
-		case 2:
-			status = login(currentUser); //take result from auth.cpp and continue
-			if (status == 0) { //call login
-				std::cout << "Login successful!\n";
-
-				if (currentUser.role == 1) { //for admin role
-					std::cout << "Redirecting to admin menu...\n";
-					showAdminMenu(currentUser);
-				}
-				else if (currentUser.role == 0) { //for student role
-					std::cout << "Redirecting to user menu...\n";
-					loadUserCourses(currentUser); //load user profile from storage.cpp
-					loadActionLogs(); //load action logs from storage.cpp
-					showUserMenu(currentUser);
-				}
-			}
-			if (status == 1) {
-				std::cout << "Login cancelled.\n";
-				break;
-			}
-			else {
-				std::cout << "Login failed! Please try again.\n";
-			}
-			break;
-		case 0:
-			running = false; //change the running status to false, so it wont continue run
-			std::cout << "\nStoping the program. Bye!";
-			break;
-		default:
-			std::cout << "Invalid input! Please enter a valid number,\n";
-			break;
-		}
-	}
-}
-//USER MANAGEMENT
 void registerUser() {
 	User newUser;
 	bool checkname;
@@ -263,4 +200,160 @@ int login(User& currentUser) { //0 if success, 1 if cancel, 2 if fail
 	}
 	return 2;
 }
+
+void UserManagementModule(User& currentUser) {
+
+	int choice;
+	bool running = true; //set it to keep running until true become false
+	int status;
+	while (running) {
+		std::cout << "\n--- User Management Module --\n";
+		std::cout << "======================================\n1. Register\n2. Login\n0. Exit\n======================================\nPlease choose one option by typing the number\n";
+		choice = intgerinputfilter("Enter your choice: ");//call the input filter function to get the input and check if it is valid
+		if (choice == -1) {
+			std::cout << "Invalid input! Please enter a valid number\n";
+			continue;
+		}
+		if (choice == -2) {
+			std::cout << "Input cannot be empty! Please enter a valid number\n";
+			continue;
+		}
+
+		//switch here get result from the choice and entering it to case for different result
+		switch (choice) {
+		case 1:
+			registerUser(); //take result from auth.cpp and continue
+			break; //break means end this case and go back to the choice section
+		case 2:
+			status = login(currentUser); //take result from auth.cpp and continue
+			if (status == 0) { //call login
+				std::cout << "Login successful!\n";
+
+				if (currentUser.role == 1) { //for admin role
+					std::cout << "Redirecting to admin menu...\n";
+				
+				}
+				else if (currentUser.role == 0) { //for student role
+					std::cout << "Redirecting to user menu...\n";
+					
+				}
+			}
+			if (status == 1) {
+				std::cout << "Login cancelled.\n";
+				break;
+			}
+			else {
+				std::cout << "Login failed! Please try again.\n";
+			}
+			break;
+		case 0:
+			running = false; //change the running status to false, so it wont continue run
+			std::cout << "\nStoping the program. Bye!";
+			break;
+		default:
+			std::cout << "Invalid input! Please enter a valid number,\n";
+			break;
+		}
+	}
+}
+
+
+//----------------------------------------------------------------------
+//Main
+int main() {
+	User currentUser; //create a user based on the struct declared on models.h
+	bool running = true;
+	while (running) {
+		std::cout << "\n--- Tuition Centre Management System ---\nPlease enter you role\n(1 for Student, 2 for Teacher)\nEnter 0 to end the program\n";
+		std::cin.clear();
+		bool looping = true;
+		std::string input;
+		int choice;
+		while (looping) {
+			if (!std::getline(std::cin, input)) { // read whole line of input and check if it is valid, no matter it is just a space or empty, it will return -2, if the input is not valid(not integer), it will return -1
+				std::cout << "Invalid input! Please enter a valid number!\n";
+				continue;
+			}
+
+			if (input.empty()) { //if input is empty, return -2 to indicate that the input is empty
+				std::cout << "Input cannot be empty! Please try again.\n";
+				continue;
+			}
+
+			std::stringstream ss(input); //use stringstream to convert the input string to integer
+			int val;
+			char extra;
+
+			if (ss >> val && !(ss >> extra)) { //fetch integer from the stringstream and check if there is any extra character after the integer, if yes, it will return -1 to indicate that the input is not valid
+				choice = val;
+				looping = false;
+				break;
+			}
+			else {
+				std::cout << "Invalid input! Please enter a valid number!\n";
+				continue;
+			}
+		}
+
+		if (choice == 1) {
+			currentUser.role = 0; //set the role to student
+			UserManagementModule(currentUser);
+			
+		}
+		else if (choice == 2) {
+			int teacherCode = 1234, subchoice; //teacher code to register as teacher, can be changed to any number you want
+			std::cout << "Please enter the teacher code to access the admin menu: ";
+			std::cin.clear();
+			bool loop = true;
+			std::string input;
+			while (loop) {
+				if (!std::getline(std::cin, input)) { // read whole line of input and check if it is valid, no matter it is just a space or empty, it will return -2, if the input is not valid(not integer), it will return -1
+					std::cout << "Invalid input! Please enter a valid number!\n";
+					continue;
+				}
+
+				if (input.empty()) { //if input is empty, return -2 to indicate that the input is empty
+					std::cout << "Input cannot be empty! Please try again.\n";
+					continue;
+				}
+
+				std::stringstream ss(input); //use stringstream to convert the input string to integer
+				int val;
+				char extra;
+
+				if (ss >> val && !(ss >> extra)) { //fetch integer from the stringstream and check if there is any extra character after the integer, if yes, it will return -1 to indicate that the input is not valid
+					subchoice = val;
+					loop = false;
+					break;
+				}
+				else {
+					std::cout << "Invalid input! Please enter a valid number!\n";
+					continue;
+				}
+			}
+			if (subchoice == teacherCode) {
+				currentUser.role = 1; //set the role to teacher
+				UserManagementModule(currentUser);
+			}
+			else {
+				std::cout << "Invalid teacher code! Please try again.\n";
+				continue;
+			}
+
+		}
+
+		if (choice == 0) {
+			running = false; //change the running status to false, so it wont continue run
+			std::cout << "\nStoping the program. Bye!";
+		}
+
+		else {
+			std::cout << "Invalid input! Please enter a valid number!\n";
+		}
+
+
+	}
+
+}
+
 //----------------------------------------------------------------------
