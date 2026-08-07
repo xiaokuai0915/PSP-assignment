@@ -4,10 +4,13 @@
 #include <vector>
 #include <sstream>
 #include <fstream>
-// MODELS
 
+// MODELS
 int mainchoice, teacherCode = 1234;
 const int Max_Logs = 100; // Maximum number of logs to store
+std::string logActionName[Max_Logs];
+int logMatrix2D[Max_Logs][3];
+int logCounter = 0;
 struct Course {
 	int id = 0;
 	std::string Name = "";
@@ -24,16 +27,11 @@ struct User {
 	std::string username;
 	std::string password;
 	std::vector<Course> mypackage;
-	int role = 1,verify;
+	int role = 0;
 };
-//----------------------------------------------------------------------
-//Headings
-void modifyUserPackage(User& currentUser, const std::vector<Course>& allCourse);
-void addCoursetoPackage(User& currentUser, const std::vector<Course>& allCourse);
-void myCourseSummary(User& currentUser, const std::vector<Course>& allCourse);
-void removeCoursefromPackage(User& currentUser, const std::vector<Course>& allCourse);
-//----------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------
 // TOOLS
+
 int intgerinputfilter(const std::string& prompt) { // to cout the prompt and get the input from user, then check if it is valid
 	std::cin.clear();
 	std::string input;
@@ -88,13 +86,14 @@ std::string stringinputfilter(const std::string& prompt) {
 
 	}
 }
-//----------------------------------------------------------------------
-
-//Storage
-std::string logActionName[Max_Logs];
-int logMatrix2D[Max_Logs][3];
-int logCounter = 0;
-
+//-------------------------------------------------------------------------------------------------------------------------
+// HEADINGS
+void modifyUserPackage(User& currentUser, const std::vector<Course>& allCourse);
+void addCoursetoPackage(User& currentUser, const std::vector<Course>& allCourse);
+void myCourseSummary(User& currentUser, const std::vector<Course>& allCourse);
+void removeCoursefromPackage(User& currentUser, const std::vector<Course>& allCourse);
+//-------------------------------------------------------------------------------------------------------------------------
+// STORAGE
 void saveUserCourses(const User& currentUser) { //load current user profile
 	std::vector<std::string> otherUserData;  //using vector to temporary save other user profile（and skip the current user one first)
 	std::ifstream infile("user_courses.txt"); //open user_courses.txt file
@@ -106,7 +105,7 @@ void saveUserCourses(const User& currentUser) { //load current user profile
 		}
 	}
 	infile.close();//close the file to avoid error 
-
+	
 	std::ofstream outfile("user_courses.txt");//write the file
 
 	for (const auto& l : otherUserData) {//write all the things into the file one by one that alr store in the vector
@@ -222,55 +221,245 @@ void searchBooking() {
 		std::cout << "No records found for Course ID: " << searchId << "\n"; //if loop finished but nothing match
 	}
 }
+//-------------------------------------------------------------------------------------------------------------------------
+// User Management Module
 
-//----------------------------------------------------------------------
-//Menu
+void registerUser(User& currentUser) {
+	User newUser;
+	bool checkname;
+	bool registration = false;
+	int teacherCode = 1234; //teacher code to register as teacher, can be changed to any number you want
+	int codeT;
+	//check if username already exists
+	do {
+		checkname = false;
+		newUser.username = stringinputfilter("Create username (Enter 0 to cancel registration) : "); //call the input filter function to get the input and check if it is valid
 
-void userMenu(User& currentUser) {
-	while (true) {
-		if (currentUser.role == 0) {
-			std::cout << "\n--- Student Menu ---\n1.Student Package Module\n2.Time Table Module\n0.Exit\nPlease enter the choice:\n";
-			int userChoice = intgerinputfilter("Choice: ");
+		if (newUser.username == "0") {
+			std::cout << "Registration cancelled.\n";
+			return;
+		}
 
-			if (userChoice == 0) {
-				std::cout << "Exiting the program. Bye!\n";
+		std::ifstream inFile("user.txt"); //ifstream means read the file
+		std::string fileU, fileP;
+		int fileR;
+
+		while (inFile >> fileU >> fileP >> fileR) {
+			std::cout << "[DEBUG] Comparing " << newUser.username << " with " << fileU << "\n"; //same reason as login, for debugging purpose
+			if (newUser.username == fileU) {
+				std::cout << "Username already exist, please use another username.\n";
+				checkname = true;
 				break;
 			}
-			if (userChoice == -1) {
-				std::cout << "Invalid input! Please try again.\n";
-				continue;
-			}
-			if (userChoice == -2) {
-				std::cout << "Input cannot be empty! Please try again.\n";
-				continue;
-			}
-			if (userChoice == 1) {
-				mainchoice = 3; //set mainchoice to 3 to indicate that we are going to student package module
-				return; //return to main to call the student package module
-			}
-			else if (userChoice == 2) {
-				std::cout << "Time Table Module is under construction.\n";
-			}
-			else {
-				std::cout << "Invalid option! Please try again.\n";
-			}
 		}
+	} while (checkname);
+
+	newUser.password = stringinputfilter("Create password: "); //call the input filter function to get the input and check if it is valid
+
+
+	do {
+		newUser.role = intgerinputfilter("Enter role (0 for Student, 1 for Teacher): "); //call the input filter function to get the input and check if it is valid
+
+		if (newUser.role == -1) {
+			std::cout << "Invalid input. Please try again.\n";
+			continue;
+		}
+
+		if (newUser.role == -2) {
+			std::cout << "Input cannot be empty. Please enter a valid number.\n";
+			continue;
+		}
+
+		if (newUser.role == 0 || newUser.role == 1) {
+			break;
+		}
+		else {
+			std::cout << "Invalid input.\n";
+		}
+	} while (true); //code always run unless breaked
+
+	if (newUser.role == 1) {
+		codeT = intgerinputfilter("Enter Teacher code: "); //call the input filter function to get the input and check if it is valid
+
+		if (codeT == -1) {
+			std::cout << "Invalid input. Please try again.\n";
+			return;
+		}
+
+		if (codeT == -2) {
+			std::cout << "Input cannot be empty. Please enter a valid number.\n";
+			return;
+		}
+
+		if (codeT == teacherCode) { //detect teacher code from models.h
+			registration = true;
+		}
+		else {
+			std::cout << "Code invalid.\n";
+			return;
+		}
+	}
+
+	
+	else {
+		registration = true;
+	}
+
+	if (registration) {
+		//ofstream is create or edit the file, ios::app is to keep the previous thing that alr available inside the file so it wont get wipe out when running this row
+		std::ofstream outFile("user.txt", std::ios::app);
+		outFile << newUser.username << " " << newUser.password << " " << newUser.role << "\n"; // store username , password, role one by one
+		outFile.close();//close the file to avoid error input into the file
+		std::cout << "Registered successfully! Please log in now!\n";
+	}
+	else {
+		std::cout << "Registration unsuccessful. Please try again.\n";
 	}
 }
 
-void adminMenu(User& currentUser) {
-	std::cout << "\n==========\n";
-	std::cout << "Admin Menu\n";
-	std::cout << "==========\n";
-	std::cout << "Welcome, Admin.\n\n";
+int login(User& currentUser) { //0 if success, 1 if cancel, 2 if fail
+	std::string inputU, inputP;
+	inputU = stringinputfilter("Username (Enter 0 to cancel login) : ");
 
-	std::cout << "Choose one option by typing number:\n1. User Module\n2. Subject Module\n3. Schedule Module\n4. Reporting Module\n0. Back to Main Menu\n";
-	std::cout << std::setfill('=') << std::setw(50) << '\n'; 
+	if (inputU == "0") {
+		return 1;
+	}
+
+	inputP = stringinputfilter("Password: ");
+
+	std::ifstream inFile("user.txt"); //ifstream means read the file
+	std::string fileU, fileP;
+	int fileR;
+
+	//if input username = username in txt file then send true as output, if no then false, password also
+	while (inFile >> fileU >> fileP >> fileR) {
+		std::cout << "[DEBUG] Comparing " << inputU << " with " << fileU << "\n"; //temporary for me to debug, i just leave it here until when we need to delete it :D
+
+		if (fileU == inputU && fileP == inputP) {
+			currentUser.username = inputU; //if entered username and password is both found from the text file and it is correct
+			currentUser.role = fileR;  // assign username and role into the user structure that create on main file
+			return 0;
+		}
+
+	}
+	return 2;
 }
-//----------------------------------------------------------------------
-//Sudent Package Module
 
+bool UserManagementModule(bool& loggedin, User& currentUser) {
+	int choice = 0;
+	int status = 0;
+	if (!loggedin) {
+		bool runningUserManagement = true; //set it to keep running until true become false
+		while (runningUserManagement) {
+			std::cout
+				<< "\n--- User Management Module --\n"
+				<< "======================================\n"
+				<< "1. Register\n2. Login\n0. Exit\n"
+				<< "======================================\n"
+				<< "Please choose one option by typing the number\n";
+
+			choice = intgerinputfilter("Enter your choice: ");//call the input filter function to get the input and check if it is valid
+			if (choice == -1) {
+				std::cout << "Invalid input! Please enter a valid number\n";
+				continue;
+			}
+			else if (choice == -2) {
+				std::cout << "Input cannot be empty! Please enter a valid number\n";
+				continue;
+			}
+
+			//switch here get result from the choice and entering it to case for different result
+			switch (choice) {
+			case 1:
+				registerUser(currentUser); //take result from auth.cpp and continue
+				break; //break means end this case and go back to the choice section
+			case 2:
+				status = login(currentUser); //take result from auth.cpp and continue
+				if (status == 0) { //call login
+					std::cout << "Login successful!\n";
+					loggedin = true;
+					return true;
+
+					if (currentUser.role == 1) { //for admin role
+						std::cout << "Redirecting to admin menu...\n";
+					}
+					else if (currentUser.role == 0) { //for student role
+						std::cout << "Redirecting to user menu...\n";
+					}
+					runningUserManagement = false;
+					return true;
+				}
+				else if (status == 1) {
+					std::cout << "Login cancelled.\n";
+				}
+				else {
+					std::cout << "Login failed! Please try again.\n";
+				}
+				break;
+			case 0:
+				std::cout << "\nStoping the program. Bye!";
+				return false;
+				break;
+			default:
+				std::cout << "Invalid input! Please enter a valid number,\n";
+				break;
+			}
+		}
+	}
+	else {
+		bool runningUserManagement = true; //set it to keep running until true become false
+		while (runningUserManagement) {
+			std::cout << "\n=============================\n";
+			std::cout << "| Admin Portal: User module |\n";
+			std::cout << "=============================\n\n";
+
+			std::cout << "Choose one option by typing number:\n"
+				"1. Add new record\n"
+				"2. Update record\n"
+				"3. Delete record\n"
+				"4. Search record\n"
+				"5. Display records\n"
+				"0. Back to Admin Menu\n";
+			std::cout << std::setfill('=') << std::setw(50) << "" << '\n';
+
+			choice = intgerinputfilter("Enter your choice(0-5): ");
+
+			switch (choice) {
+			case 1:
+				//addNewUser();
+				break;
+			case 2:
+				//updateUser(currentUser);
+				break;
+			case 3:
+				//deleteUser(currentUser);
+				break;
+			case 4:
+				//searchUser();
+				break;
+			case 5:
+				//displayUser();
+				break;
+			case 0:
+				runningUserManagement = false;
+				std::cout << "Reverting back to Admin menu......\n\n";
+				break;
+			case -2: //-2 means empty input
+				std::cout << "Input cannot be empty. Please enter a valid number.\n";
+				break;
+			default:
+				std::cout << "Invalid input! Please enter a valid number.\n\n";
+				break;
+			}
+		}
+	}
+	return true;
+}
+//-------------------------------------------------------------------------------------------------------------------------
+// Student Package Module
 void StudentPackageModule(User& currentUser, const std::vector<Course>& allCourse) {
+	loadUserCourses(currentUser); //load the current user profile from the text file to the vector
+	loadActionLogs(); //load the previous action logs from the text file to the 1d and 2d array
 	bool running = true; //loop control
 	while (running) {
 		std::cout << "\n---View Course or Manage Course Section---\n========================================\n1.View All Courses\n2.Add Course to Package\n3.Review my package\n4.Remove Course from Package\n5.Modify my package\n6.Search Booking Record\n0.Back to User Menu\n========================================\nPlease choose one option by typing the number\n";
@@ -523,309 +712,103 @@ void modifyUserPackage(User& currentUser, const std::vector<Course>& allCourse) 
 		}
 	}
 }
+//-------------------------------------------------------------------------------------------------------------------------
 
-//----------------------------------------------------------------------
-
-// UserManagementModule
-
-void registerUser(User& currentUser) {
-	User newUser;
-	bool checkname;
-	bool registration = false;
-	int teacherCode = 1234; //teacher code to register as teacher, can be changed to any number you want
-	int codeT;
-	//check if username already exists
-	do {
-		checkname = false;
-		newUser.username = stringinputfilter("Create username (Enter 0 to cancel registration) : "); //call the input filter function to get the input and check if it is valid
-
-		if (newUser.username == "0") {
-			std::cout << "Registration cancelled.\n";
-			return;
-		}
-
-		std::ifstream inFile("user.txt"); //ifstream means read the file
-		std::string fileU, fileP;
-		int fileR;
-
-		while (inFile >> fileU >> fileP >> fileR) {
-			std::cout << "[DEBUG] Comparing " << newUser.username << " with " << fileU << "\n"; //same reason as login, for debugging purpose
-			if (newUser.username == fileU) {
-				std::cout << "Username already exist, please use another username.\n";
-				checkname = true;
-				break;
-			}
-		}
-	} while (checkname);
-
-	newUser.password = stringinputfilter("Create password: "); //call the input filter function to get the input and check if it is valid
-
-	
-	if (currentUser.verify == 0) {
-		newUser.role = 0; //set the role to student
-	}
-
-
-	if (newUser.verify == 1) {
-		codeT = intgerinputfilter("Enter Teacher code: "); //call the input filter function to get the input and check if it is valid
-
-		if (codeT == -1) {
-			std::cout << "Invalid input. Please try again.\n";
-			return;
-		}
-
-		if (codeT == -2) {
-			std::cout << "Input cannot be empty. Please enter a valid number.\n";
-			return;
-		}
-
-		if (codeT == teacherCode) { //detect teacher code from models
-			registration = true;
-		}
-		else {
-			std::cout << "Code invalid.\n";
-			return;
-		}
-	}
-	else {
-		registration = true;
-	}
-
-	if (registration) {
-		//ofstream is create or edit the file, ios::app is to keep the previous thing that alr available inside the file so it wont get wipe out when running this row
-		std::ofstream outFile("user.txt", std::ios::app);
-		outFile << newUser.username << " " << newUser.password << " " << newUser.role << "\n"; // store username , password, role one by one
-		outFile.close();//close the file to avoid error input into the file
-		std::cout << "Registered successfully! Please log in now!\n";
-	}
-	else {
-		std::cout << "Registration unsuccessful. Please try again.\n";
-	}
-}
-
-int login(User& currentUser) { //0 if success, 1 if cancel, 2 if fail
-	std::string inputU, inputP;
-	inputU = stringinputfilter("Username (Enter 0 to cancel login) : ");
-
-	if (inputU == "0") {
-		return 1;
-	}
-
-	inputP = stringinputfilter("Password: ");
-
-	std::ifstream inFile("user.txt"); //ifstream means read the file
-	std::string fileU, fileP;
-	int fileR;
-
-
-	//if input username = username in txt file then send true as output, if no then false, password also
-	while (inFile >> fileU >> fileP >> fileR) {
-		std::cout << "[DEBUG] Comparing " << inputU << " with " << fileU << "\n"; //temporary for me to debug, i just leave it here until when we need to delete it :D
-
-		if (fileU == inputU && fileP == inputP) {
-			currentUser.username = inputU; //if entered username and password is both found from the text file and it is correct
-			currentUser.role = fileR;  // assign username and role into the user structure that create on main file
-			return 0;
-		}
-
-	}
-	return 2;
-}
-
-void UserManagementModule(User& currentUser) {
-	bool running = true;
-	int status;
-	while (running) {
-		if (mainchoice > 2) {
-			return;
-		}
-		mainchoice = 0;
-		if (currentUser.verify == 0) {
-			std::cout << "\n--- Student Menu ---\n1.Reigster\n2.Login\n0.Exit\nPlease enter the choice:\n";
-			int studentChoice = intgerinputfilter("Choice: ");
-
-			if (studentChoice == 0) {
-				running = false;
-				std::cout << "Exiting the program. Bye!\n";
-				break;
-			}
-
-			if (studentChoice == -1) {
-				std::cout << "Invalid input! Please try again.\n";
-				continue;
-			}
-
-			if (studentChoice == -2) {
-				std::cout << "Input cannot be empty! Please try again.\n";
-				continue;
-			}
-
-			if (studentChoice == 1) {
-				registerUser(currentUser);
-			}
-			if (studentChoice == 2){
-				status = login(currentUser);
-				if (status == 0) {
-					std::cout << "Login successful! Welcome, " << currentUser.username << "!\n";
-					if (currentUser.role == 0) {
-						userMenu(currentUser);
-					}
-
-				}
-				else if (status == 1) {
-					std::cout << "Login cancelled.\n";
-				}
-				else if (status == 2) {
-					std::cout << "Login failed. Please check your username and password.\n";
-				}
-			}
-		}
-		else if (currentUser.verify == 1) {
-			std::cout << "\n--- Teacher Menu ---\n1.Reigster\n2.Login\n0.Exit\nPlease enter the choice:\n";
-			int teacherChoice = intgerinputfilter("Choice: ");
-
-			if (teacherChoice == 0) {
-				running = false;
-				std::cout << "Exiting the program. Bye!\n";
-				break;
-			}
-
-			if (teacherChoice == -1) {
-				std::cout << "Invalid input! Please try again.\n";
-				continue;
-			}
-
-			if (teacherChoice == -2) {
-				std::cout << "Input cannot be empty! Please try again.\n";
-				continue;
-			}
-
-			if (teacherChoice == 1) {
-				registerUser(currentUser);
-			}
-			if (teacherChoice == 2) {
-				status = login(currentUser);
-				if (status == 0) {
-					std::cout << "Login successful! Welcome, " << currentUser.username << "!\n";
-					if (currentUser.role == 1) {
-						adminMenu(currentUser);
-					}
-				}
-				else if (status == 1) {
-					std::cout << "Login cancelled.\n";
-				}
-				else if (status == 2) {
-					std::cout << "Login failed. Please check your username and password.\n";
-				}
-			}
-		}
-		else {
-			std::cout << "Invalid option! Please try again.\n";
-		}
-
-	}
-}
-
-
-//----------------------------------------------------------------------
-//Main
 int main() {
-	User currentUser; //create a user based on the struct declared on models.h
-	bool running = true;
-	while (running) {
-		std::cout << "\n--- Tuition Centre Management System ---\nPlease enter you role\n(1 for Student, 2 for Teacher)\nEnter 0 to end the program\n";
-		std::cin.clear();
-		bool looping = true;
-		std::string input;
-		while (looping) {
-			if (!std::getline(std::cin, input)) { // read whole line of input and check if it is valid, no matter it is just a space or empty, it will return -2, if the input is not valid(not integer), it will return -1
-				std::cout << "Invalid input! Please enter a valid number!\n";
-				continue;
-			}
-
-			if (input.empty()) { //if input is empty, return -2 to indicate that the input is empty
-				std::cout << "Input cannot be empty! Please try again.\n";
-				continue;
-			}
-
-			std::stringstream ss(input); //use stringstream to convert the input string to integer
-			int val;
-			char extra;
-
-			if (ss >> val && !(ss >> extra)) { //fetch integer from the stringstream and check if there is any extra character after the integer, if yes, it will return -1 to indicate that the input is not valid
-				mainchoice = val;
-				looping = false;
-				break;
-			}
-			else {
-				std::cout << "Invalid input! Please enter a valid number!\n";
-				continue;
-			}
+	User currentUser;
+	bool loggedin = false;
+	bool runningMain = true;
+	while (runningMain) {
+		if (!loggedin) {
+			runningMain = UserManagementModule(loggedin, currentUser);
 		}
-
-		if (mainchoice == 1) {
-			currentUser.verify = 0; 
-			UserManagementModule(currentUser);
-
-		}
-		else if (mainchoice == 2) {
-			int subchoice; //teacher code to register as teacher, can be changed to any number you want
-			std::cout << "Please enter the teacher code to access the admin menu: ";
-			std::cin.clear();
-			bool loop = true;
-			std::string input;
-			while (loop) {
-				if (!std::getline(std::cin, input)) { // read whole line of input and check if it is valid, no matter it is just a space or empty, it will return -2, if the input is not valid(not integer), it will return -1
-					std::cout << "Invalid input! Please enter a valid number!\n";
+		else {
+			if (currentUser.role == 1) {
+				std::cout
+					<< "\n==========\n"
+					<< "Admin Menu\n"
+					<< "==========\n"
+					<< "Welcome, Admin.\n\n"
+					<< "Choose one option by typing number:\n"
+					<< "1. User Module\n"
+					<< "2. Subject Module\n"
+					<< "3. Schedule Module\n"
+					<< "4. Reporting Module\n"
+					<< "0. Back to Main Menu\n"
+					<< "=================================================\n"
+					<< "\nEnter your choice (0-5): ";
+				int subchoice;
+				if (!(std::cin >> subchoice)) {
+					std::cin.clear();
+					std::cin.ignore(100, '\n');
+					std::cout << "Invalid input! Please enter a number.\n";
 					continue;
 				}
-
-				if (input.empty()) { //if input is empty, return -2 to indicate that the input is empty
-					std::cout << "Input cannot be empty! Please try again.\n";
-					continue;
-				}
-
-				std::stringstream ss(input); //use stringstream to convert the input string to integer
-				int val;
-				char extra;
-
-				if (ss >> val && !(ss >> extra)) { //fetch integer from the stringstream and check if there is any extra character after the integer, if yes, it will return -1 to indicate that the input is not valid
-					subchoice = val;
-					loop = false;
+				std::cin.ignore(100, '\n');
+				switch (subchoice) {
+				case 1:
+					std::cout << "\n[!] Opening User Module dashboard......\n";//load the user module
+					UserManagementModule(loggedin, currentUser);
+					break;
+				case 2:
+					std::cout << "\n[!] Opening Subject Module dashboard......\n";//load the subject module
+					//subject module
+					break;
+				case 3:
+					std::cout << "\n[!] Opening Schedule Module dashboard......\n";//load the schedule module
+					//schedule module
+					break;
+				case 4:
+					std::cout << "\n[!] Opening Reporting Module dashboard......\n";//load the report module
+					break;
+				case 0:
+					loggedin = false;
+					currentUser = User{};
+					std::cout << "Logging out......\n\n";
+					break;
+				default:
+					std::cout << "Invalid input! Please enter a valid number.\n\n";
 					break;
 				}
-				else {
-					std::cout << "Invalid input! Please enter a valid number!\n";
-					continue;
-				}
-			}
-			if (subchoice == teacherCode) {
-				currentUser.verify = 1; //set the role to teacher
-				UserManagementModule(currentUser);
 			}
 			else {
-				std::cout << "Invalid teacher code! Please try again.\n";
-				continue;
+				std::cout
+					<< "\n=========\n"
+					<< "User Menu\n"
+					<< "=========\n"
+					<< "Welcome, student " << currentUser.username
+					<< "\n\nChoose one option by typing number:\n"
+					<< "1. Student Package Module\n"
+					<< "2. Schedule Module\n"
+					<< "0. Back to Main Menu\n"
+					<< "=================================================\n"
+					<< "\nEnter your choice (0-2): ";
+				int subchoice;
+				if (!(std::cin >> subchoice)) {
+					std::cin.clear();
+					std::cin.ignore(100, '\n');
+					std::cout << "Invalid input! Please enter a number.\n";
+					continue;
+				}
+				std::cin.ignore(100, '\n');
+
+				switch (subchoice) {
+				case 1:
+					std::cout << "\n[!] Opening Student Package Module dashboard......\n";
+					StudentPackageModule(currentUser, allCourse);
+					break;
+				case 0:
+					loggedin = false;
+					currentUser = User{};
+					std::cout << "Logging out......\n\n";
+					break;
+				default:
+					std::cout << "Invalid input! Please enter a valid number.\n\n";
+					break;
+				}
 			}
-
 		}
-
-		if (mainchoice == 0) {
-			running = false; //change the running status to false, so it wont continue run
-			std::cout << "\nStoping the program. Bye!";
-		}
-
-		if (mainchoice == 3) {
-			StudentPackageModule(currentUser, allCourse);
-		}
-
-		else {
-			std::cout << "Invalid input! Please enter a valid number!\n";
-		}
-
-
 	}
 
+	return 0;
 }
-
-//----------------------------------------------------------------------
