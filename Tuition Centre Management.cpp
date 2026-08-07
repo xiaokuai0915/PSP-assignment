@@ -11,12 +11,12 @@ const int Max_Logs = 100; // Maximum number of logs to store
 std::string logActionName[Max_Logs];
 int logMatrix2D[Max_Logs][3];
 int logCounter = 0;
+
 struct Course {
 	int id = 0;
 	std::string Name = "";
 	double price = 0.0;
 };
-
 std::vector<Course> allCourse = { //create a course vector to store courses
 		{1,"Mathematics", 100.5},
 		{2,"Problem solving and programming", 200.0},
@@ -105,7 +105,7 @@ void saveUserCourses(const User& currentUser) { //load current user profile
 		}
 	}
 	infile.close();//close the file to avoid error 
-	
+
 	std::ofstream outfile("user_courses.txt");//write the file
 
 	for (const auto& l : otherUserData) {//write all the things into the file one by one that alr store in the vector
@@ -256,21 +256,18 @@ void registerUser(User& currentUser) {
 
 	newUser.password = stringinputfilter("Create password: "); //call the input filter function to get the input and check if it is valid
 
-
 	do {
 		newUser.role = intgerinputfilter("Enter role (0 for Student, 1 for Teacher): "); //call the input filter function to get the input and check if it is valid
 
 		if (newUser.role == -1) {
 			std::cout << "Invalid input. Please try again.\n";
-			continue;
 		}
 
-		if (newUser.role == -2) {
+		else if (newUser.role == -2) {
 			std::cout << "Input cannot be empty. Please enter a valid number.\n";
-			continue;
 		}
 
-		if (newUser.role == 0 || newUser.role == 1) {
+		else if (newUser.role == 0 || newUser.role == 1) {
 			break;
 		}
 		else {
@@ -300,7 +297,7 @@ void registerUser(User& currentUser) {
 		}
 	}
 
-	
+
 	else {
 		registration = true;
 	}
@@ -317,88 +314,368 @@ void registerUser(User& currentUser) {
 	}
 }
 
-int login(User& currentUser) { //0 if success, 1 if cancel, 2 if fail
+void addNewUser() {
+	std::ofstream outfile("user.txt", std::ios::app);
+	std::string username, password;
+	int role;
+
+	bool checkname;
+	do { //check if username exists or not
+		checkname = false;
+		username = stringinputfilter("Create username (Enter 0 to cancel registration) : "); //call the input filter function to get the input and check if it is valid
+
+		if (username == "0") {
+			std::cout << "Registration cancelled.\n";
+			return;
+		}
+
+		std::ifstream file("user.txt");
+		std::string fileU, fileP;
+		int fileR;
+
+		while (file >> fileU >> fileP >> fileR) {
+			if (username == fileU) {
+				std::cout << "Username already exist, please use another username.\n";
+				checkname = true;
+				break;
+			}
+		}
+		file.close();
+	} while (checkname);
+	password = stringinputfilter("Create password: ");
+	do {
+		role = intgerinputfilter("Enter role (Teacher=1, Student=0): ");
+		if (role == -1) { //if -1 is returned, it means a !int value is entered
+			std::cout << "Invalid input. Please try again!\n";
+		}
+		else if (role == -2) { //if -2 is returned, it means an empty input was entered
+			std::cout << "Input cannot be empty. Please enter a valid number.\n";
+		}
+		else if (role == 0 || role == 1) { //role only accepts 0 and 1
+			break;
+		}
+		else {
+			std::cout << "Invalid input. Please try again!\n";
+		}
+	} while (true);
+
+	outfile << username << " " << password << " " << role << std::endl; //Enter data to file
+	outfile.close();
+	std::cout << "User added successfully.\n";
+}
+
+void searchUser() {
+	std::ifstream infile("user.txt");
+	std::string username, password;
+	int role;
+
+	std::string searchUser;
+	searchUser = stringinputfilter("Enter username to search: ");
+
+	bool found = false;
+	while (infile >> username >> password >> role) {
+		if (username == searchUser) { //== means found
+			std::cout << "User found\n";
+			std::cout << "Username: " << username << std::endl;
+			std::cout << "Password: " << password << std::endl;
+			std::cout << "Role: " << (role == 1 ? "Teacher" : "Student") << std::endl;
+			found = true;
+			break;
+		}
+	}
+
+	if (!found) {
+		std::cout << "User not found.\n";
+	}
+	infile.close();
+}
+
+void updateUser(User& currentUser) {
+	std::ifstream infile("user.txt");
+	std::string username, password;
+	int role;
+	std::vector<User> userList;
+
+	std::string searchUser = stringinputfilter("Enter username to update: ");
+	if (searchUser == currentUser.username) { //don't allow to edit logged in user
+		std::cout << "Cannot update logged in user.\n";
+		return;
+	}
+
+	bool found = false;
+	while (infile >> username >> password >> role) {
+		if (username == searchUser) { //edit user
+			bool checkname;
+			do { //check username
+				checkname = false;
+				username = stringinputfilter("Enter new username (Enter 0 to cancel) : ");
+
+				if (username == "0") {
+					std::cout << "Registration cancelled.\n";
+					return;
+				}
+
+				std::ifstream file("Data/user.txt");
+				std::string fileU, fileP;
+				int fileR;
+
+				while (file >> fileU >> fileP >> fileR) {
+					if (username == fileU && username != searchUser) {
+						std::cout << "Username already exist, please use another username.\n";
+						checkname = true;
+						break;
+					}
+				}
+				file.close();
+			} while (checkname);
+			password = stringinputfilter("Enter new password: ");
+			do {
+				role = intgerinputfilter("Enter new role (Teacher=1, Student=0): ");
+				if (role == -1) { //if -1 is returned, it means a !int value is entered
+					std::cout << "Invalid input. Please try again!\n";
+				}
+				else if (role == -2) { //if -2 is returned, it means an empty input was entered
+					std::cout << "Input cannot be empty. Please enter a valid number.\n";
+				}
+				else if (role == 0 || role == 1) { //role only accepts 0 and 1
+					break;
+				}
+				else {
+					std::cout << "Invalid input. Please try again!\n";
+				}
+			} while (true);
+
+			found = true;
+		}
+		User u; //push all data into userList
+		u.username = username;
+		u.password = password;
+		u.role = role;
+		userList.push_back(u);
+	}
+
+	infile.close();
+
+	if (found) { //rewrites userList into user.txt if got changes
+		std::ofstream outfile("user.txt");
+		for (User& u : userList) {
+			outfile << u.username << " " << u.password << " " << u.role << "\n";
+		}
+		outfile.close();
+		std::cout << "User updated.\n";
+	}
+	else {
+		std::cout << "User not found.\n";
+	}
+}
+
+void deleteUser(User& currentUser) {
+	std::ifstream infile("user.txt");
+	std::string username, password;
+	int role;
+	std::vector<User> userList;
+
+	std::string searchUser = stringinputfilter("Enter username to delete (Enter 0 to cancel) : ");
+
+	if (searchUser == "0") {
+		std::cout << "Deletion cancelled.\n";
+		return;
+	}
+
+	if (searchUser == currentUser.username) { //don't allow to delete logged in user
+		std::cout << "Cannot delete logged in user.\n";
+		return;
+	}
+
+	bool found = false;
+	while (infile >> username >> password >> role) {
+		if (username != searchUser) { //push all data accept the user that'll be deleted
+			User u;
+			u.username = username;
+			u.password = password;
+			u.role = role;
+			userList.push_back(u);;
+		}
+		else {
+			found = true;
+		}
+	}
+
+	infile.close();
+
+	if (found) { //rewrites userList into user.txt if got changes
+		std::ofstream outfile("user.txt");
+		for (User& u : userList) {
+			outfile << u.username << " " << u.password << " " << u.role << "\n";
+		}
+		outfile.close();
+		std::cout << "User deleted.\n";
+	}
+	else {
+		std::cout << "User not found.\n";
+	}
+}
+
+void displayUser() {
+	std::ifstream infile("user.txt");
+	std::string username, password; int role;
+
+	std::cout << std::setfill(' ');
+	std::cout << "\nChoose one option by typing number:\n"
+		<< "1. Display all user\n"
+		<< "2. Display all teacher\n"
+		<< "3. Display all student\n";
+	int displayChoice = 0;
+	do {
+		displayChoice = intgerinputfilter("Enter your choice(1-3): ");
+		if (displayChoice == -2) { //if -2 is returned, it means an empty input was entered
+			std::cout << "Input cannot be empty. Please enter a valid number.\n";
+		}
+		else if (displayChoice == -1 || !(displayChoice >= 1 && displayChoice <= 3)) { //if -1 is returned, it means a !int value is entered, also checks if displayChoice is 1,2,3
+			std::cout << "Invalid input. Please try again!\n";
+		}
+		else {
+			break;
+		}
+	} while (true);
+
+	std::vector<User> allUsers;
+	User temp;
+	while (infile >> temp.username >> temp.password >> temp.role) { //repeats reading a line from user.txt and save into temp until it reaches the end
+		allUsers.push_back(temp); //push data from temp into vector allUsers
+	}
+	for (int i = 0; i < allUsers.size() - 1; i++) { //bubble sort
+		for (int j = 0; j < allUsers.size() - i - 1; j++) {
+			std::string lowerCaseName1 = allUsers[j].username; //get the username on the current index
+			std::string lowerCaseName2 = allUsers[j + 1].username; //get the username on the next index
+			for (char& c : lowerCaseName1) { //convert current into lowercase char by char
+				c = tolower(c);
+			}
+			for (char& c : lowerCaseName2) { //convert next into lowercase char by char
+				c = tolower(c);
+			}
+			if (lowerCaseName1 > lowerCaseName2) { //comparison for string compares their ASCII values, if current's ASCII value is bigger than next's, then swap place
+				temp = allUsers[j];
+				allUsers[j] = allUsers[j + 1];
+				allUsers[j + 1] = temp;
+			}
+		}
+	}
+
+	int totalUser = 0;
+	std::cout << "\n- -------------------- - ------- -\n"
+		<< "| Username             | Role    |\n"
+		<< "- -------------------- - ------- -\n";
+
+	switch (displayChoice) {
+	case 1:
+		for (const User& user : allUsers) { //display all user records
+			std::cout << "| "
+				<< std::left << std::setw(20) << user.username
+				<< " | "
+				<< (user.role == 1 ? "Teacher" : "Student")
+				<< " |\n";
+			totalUser++;
+		}
+		std::cout << "- -------------------- - ------- -\n"
+			<< "                    Total Users: " << totalUser << std::endl;
+		break;
+
+	case 2:
+		for (const User& user : allUsers) { //display teacher records
+			if (user.role == 1) {
+				std::cout << "| "
+					<< std::left << std::setw(20) << user.username
+					<< " | Teacher |\n";
+				totalUser++;
+			}
+		}
+		std::cout << "- -------------------- - ------- -\n"
+			<< "                  Total teacher: " << totalUser << std::endl;
+		break;
+
+	case 3:
+		for (const User& user : allUsers) { //display student records
+			if (user.role == 0) {
+				std::cout << "| "
+					<< std::left << std::setw(20) << user.username
+					<< " | Student |\n";
+				totalUser++;
+			}
+		}
+		std::cout << "- -------------------- - ------- -\n"
+			<< "                  Total student: " << totalUser << std::endl;
+		break;
+	}
+}
+
+int login(User& currentUser, bool& loggedin, bool& runningUserManagement) {
 	std::string inputU, inputP;
 	inputU = stringinputfilter("Username (Enter 0 to cancel login) : ");
 
+	// Check for cancellation
 	if (inputU == "0") {
+		std::cout << "Login cancelled.\n";
 		return 1;
 	}
 
 	inputP = stringinputfilter("Password: ");
 
-	std::ifstream inFile("user.txt"); //ifstream means read the file
+	std::ifstream inFile("user.txt");
 	std::string fileU, fileP;
 	int fileR;
 
-	//if input username = username in txt file then send true as output, if no then false, password also
 	while (inFile >> fileU >> fileP >> fileR) {
-		std::cout << "[DEBUG] Comparing " << inputU << " with " << fileU << "\n"; //temporary for me to debug, i just leave it here until when we need to delete it :D
+		std::cout << "[DEBUG] Comparing " << inputU << " with " << fileU << "\n";
 
 		if (fileU == inputU && fileP == inputP) {
-			currentUser.username = inputU; //if entered username and password is both found from the text file and it is correct
-			currentUser.role = fileR;  // assign username and role into the user structure that create on main file
+			currentUser.username = inputU;
+			currentUser.role = fileR;
+
+			std::cout << "Login successful!\n";
+			loggedin = true;
+
+			if (currentUser.role == 1) { // Teacher role
+				std::cout << "Redirecting to admin menu...\n";
+			}
+			else if (currentUser.role == 0) { // Student role
+				std::cout << "Redirecting to user menu...\n";
+			}
+
+			runningUserManagement = false;
 			return 0;
 		}
-
 	}
+	std::cout << "Login failed! Please try again.\n";
 	return 2;
 }
 
 bool UserManagementModule(bool& loggedin, User& currentUser) {
 	int choice = 0;
-	int status = 0;
+	bool runningUserManagement = true; //set it to keep running until true become false
 	if (!loggedin) {
-		bool runningUserManagement = true; //set it to keep running until true become false
 		while (runningUserManagement) {
-			std::cout
-				<< "\n--- User Management Module --\n"
-				<< "======================================\n"
-				<< "1. Register\n2. Login\n0. Exit\n"
-				<< "======================================\n"
-				<< "Please choose one option by typing the number\n";
+			std::cout << "\n--- User Management Module --\n"
+				"======================================\n"
+				"1. Register\n2. Login\n0. Exit\n"
+				"======================================\n"
+				"Please choose one option by typing the number\n";
 
 			choice = intgerinputfilter("Enter your choice: ");//call the input filter function to get the input and check if it is valid
-			if (choice == -1) {
-				std::cout << "Invalid input! Please enter a valid number\n";
-				continue;
-			}
-			else if (choice == -2) {
-				std::cout << "Input cannot be empty! Please enter a valid number\n";
-				continue;
-			}
 
 			//switch here get result from the choice and entering it to case for different result
 			switch (choice) {
 			case 1:
-				registerUser(currentUser); //take result from auth.cpp and continue
-				break; //break means end this case and go back to the choice section
+				registerUser(currentUser);
+				break;
 			case 2:
-				status = login(currentUser); //take result from auth.cpp and continue
-				if (status == 0) { //call login
-					std::cout << "Login successful!\n";
-					loggedin = true;
-					return true;
-
-					if (currentUser.role == 1) { //for admin role
-						std::cout << "Redirecting to admin menu...\n";
-					}
-					else if (currentUser.role == 0) { //for student role
-						std::cout << "Redirecting to user menu...\n";
-					}
-					runningUserManagement = false;
-					return true;
-				}
-				else if (status == 1) {
-					std::cout << "Login cancelled.\n";
-				}
-				else {
-					std::cout << "Login failed! Please try again.\n";
-				}
+				login(currentUser, loggedin, runningUserManagement);
 				break;
 			case 0:
-				std::cout << "\nStoping the program. Bye!";
+				std::cout << "\nStopping the program. Bye!";
 				return false;
+			case -2: //-2 means empty input
+				std::cout << "Input cannot be empty. Please enter a valid number.\n";
 				break;
 			default:
 				std::cout << "Invalid input! Please enter a valid number,\n";
@@ -407,13 +684,12 @@ bool UserManagementModule(bool& loggedin, User& currentUser) {
 		}
 	}
 	else {
-		bool runningUserManagement = true; //set it to keep running until true become false
 		while (runningUserManagement) {
 			std::cout << "\n=============================\n";
 			std::cout << "| Admin Portal: User module |\n";
 			std::cout << "=============================\n\n";
 
-			std::cout << "Choose one option by typing number:\n"
+			std::cout << "Choose one option by typing number:\n" //prompt to get choice
 				"1. Add new record\n"
 				"2. Update record\n"
 				"3. Delete record\n"
@@ -422,26 +698,26 @@ bool UserManagementModule(bool& loggedin, User& currentUser) {
 				"0. Back to Admin Menu\n";
 			std::cout << std::setfill('=') << std::setw(50) << "" << '\n';
 
-			choice = intgerinputfilter("Enter your choice(0-5): ");
+			choice = intgerinputfilter("Enter your choice(0-5): "); //input filter
 
 			switch (choice) {
 			case 1:
-				//addNewUser();
+				addNewUser(); // to add a new user
 				break;
 			case 2:
-				//updateUser(currentUser);
+				updateUser(currentUser); // to update an existing user
 				break;
 			case 3:
-				//deleteUser(currentUser);
+				deleteUser(currentUser); // to delete a user
 				break;
 			case 4:
-				//searchUser();
+				searchUser(); // search for user by name
 				break;
 			case 5:
-				//displayUser();
+				displayUser(); // display users
 				break;
 			case 0:
-				runningUserManagement = false;
+				runningUserManagement = false; // end loop
 				std::cout << "Reverting back to Admin menu......\n\n";
 				break;
 			case -2: //-2 means empty input
@@ -724,7 +1000,7 @@ int main() {
 		}
 		else {
 			if (currentUser.role == 1) {
-				std::cout
+				std::cout //prompt to get menuChoice
 					<< "\n==========\n"
 					<< "Admin Menu\n"
 					<< "==========\n"
@@ -737,17 +1013,17 @@ int main() {
 					<< "0. Back to Main Menu\n"
 					<< "=================================================\n"
 					<< "\nEnter your choice (0-5): ";
-				int subchoice;
-				if (!(std::cin >> subchoice)) {
+				int menuChoice;
+				if (!(std::cin >> menuChoice)) {
 					std::cin.clear();
 					std::cin.ignore(100, '\n');
 					std::cout << "Invalid input! Please enter a number.\n";
 					continue;
 				}
 				std::cin.ignore(100, '\n');
-				switch (subchoice) {
+				switch (menuChoice) {
 				case 1:
-					std::cout << "\n[!] Opening User Module dashboard......\n";//load the user module
+					std::cout << "\n[!] Opening User Module dashboard......\n";//load the user management module
 					UserManagementModule(loggedin, currentUser);
 					break;
 				case 2:
@@ -760,6 +1036,7 @@ int main() {
 					break;
 				case 4:
 					std::cout << "\n[!] Opening Reporting Module dashboard......\n";//load the report module
+					//report module
 					break;
 				case 0:
 					loggedin = false;
@@ -772,7 +1049,7 @@ int main() {
 				}
 			}
 			else {
-				std::cout
+				std::cout //prompt to get menuChoice
 					<< "\n=========\n"
 					<< "User Menu\n"
 					<< "=========\n"
@@ -783,8 +1060,8 @@ int main() {
 					<< "0. Back to Main Menu\n"
 					<< "=================================================\n"
 					<< "\nEnter your choice (0-2): ";
-				int subchoice;
-				if (!(std::cin >> subchoice)) {
+				int menuChoice;
+				if (!(std::cin >> menuChoice)) {
 					std::cin.clear();
 					std::cin.ignore(100, '\n');
 					std::cout << "Invalid input! Please enter a number.\n";
@@ -792,9 +1069,9 @@ int main() {
 				}
 				std::cin.ignore(100, '\n');
 
-				switch (subchoice) {
+				switch (menuChoice) {
 				case 1:
-					std::cout << "\n[!] Opening Student Package Module dashboard......\n";
+					std::cout << "\n[!] Opening Student Package Module dashboard......\n";//load the student package module
 					StudentPackageModule(currentUser, allCourse);
 					break;
 				case 0:
