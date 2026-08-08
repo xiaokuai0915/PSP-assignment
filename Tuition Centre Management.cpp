@@ -92,6 +92,7 @@ void modifyUserPackage(User& currentUser, const std::vector<Course>& allCourse);
 void addCoursetoPackage(User& currentUser, const std::vector<Course>& allCourse);
 void myCourseSummary(User& currentUser, const std::vector<Course>& allCourse);
 void removeCoursefromPackage(User& currentUser, const std::vector<Course>& allCourse);
+void showAllCourses(const std::vector<Course>& allCourse);
 //-------------------------------------------------------------------------------------------------------------------------
 // STORAGE
 void saveUserCourses(const User& currentUser) { //load current user profile
@@ -740,53 +741,45 @@ void StudentPackageModule(User& currentUser, const std::vector<Course>& allCours
 	while (running) {
 		std::cout << "\n---View Course or Manage Course Section---\n========================================\n1.View All Courses\n2.Add Course to Package\n3.Review my package\n4.Remove Course from Package\n5.Modify my package\n6.Search Booking Record\n0.Back to User Menu\n========================================\nPlease choose one option by typing the number\n";
 		int subChoice = intgerinputfilter("Enter your choice: "); //call the input filter function to get the input and check if it is valid)
-
-		if (subChoice == -1) {
+		switch (subChoice) {
+		case -1:
 			std::cout << "Invalid input. Please try again!\n";
 			continue;
-		}
 
-		if (subChoice == -2) {
+		case -2:
 			std::cout << "Input cannot be empty. Please enter a valid number.\n";
 			continue;
-		}
 
-		if (subChoice == 1) {
-			for (const auto& c : allCourse) { /* c is temporary variable, autolet it auto detect the type of variable of c for allCourse that store in vector
-												 const to avoid is telling the compiler to read the file only(no edit to the file)    & direct pass by reference ( no need to copy anymore so faster)*/
-				std::cout << '\n';
-				std::cout << "ID= " << c.id << ". " << c.Name << " - $" << c.price << "\n"; //since all the variable type is auto sync so can direct output easily
-			}
-		}
-		else if (subChoice == 2) {
+		case 1:
+			showAllCourses(allCourse);
+			break;
+		case 2:
 			std::cout << "\n--- Add Course to Package ---\n";
 			addCoursetoPackage(currentUser, allCourse);
-		}
-
-		else if (subChoice == 3) {
+			break;
+		case 3:
 			myCourseSummary(currentUser, allCourse);
-		}
-
-		else if (subChoice == 4) {
+			break;
+		case 4:
 			removeCoursefromPackage(currentUser, allCourse);
-		}
+			break;
 
-		else if (subChoice == 5) {
+		case 5:
 			modifyUserPackage(currentUser, allCourse);
-		}
+			break;
 
-		else if (subChoice == 6) {
+		case 6:
 			searchBooking();
-		}
+			break;
 
-		else if (subChoice == 0) {
+		case 0:
 			saveUserCourses(currentUser); //back up saving, save one more time to avoid accident
 			running = false;    //end the loop by changing the bool variable on the top of this page
 			std::cout << "Redirecting back to User Menu...\n";
 			break;
-		}
-		else {
+		default:
 			std::cout << "Invalid option, try again.\n";
+			continue;
 		}
 
 	}
@@ -986,6 +979,16 @@ void modifyUserPackage(User& currentUser, const std::vector<Course>& allCourse) 
 			std::cout << "Course not found in the available courses.\n";
 			continue;
 		}
+	}
+}
+
+//6 show all courses
+void showAllCourses(const std::vector<Course>& allCourse) {
+	std::cout << "\n--- All Available Courses ---\n";
+	for (const auto& c : allCourse) { /* c is temporary variable, autolet it auto detect the type of variable of c for allCourse that store in vector
+												 const to avoid is telling the compiler to read the file only(no edit to the file)    & direct pass by reference ( no need to copy anymore so faster)*/
+		std::cout << '\n';
+		std::cout << "ID= " << c.id << ". " << c.Name << " - $" << c.price << "\n"; //since all the variable type is auto sync so can direct output easily
 	}
 }
 //-------------------------------------------------------------------------------------------------------------------------
