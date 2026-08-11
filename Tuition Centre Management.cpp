@@ -153,6 +153,7 @@ int main() {
 	bool loggedin = false;
 	bool runningMain = true;
 	while (runningMain) {
+	std::cout << "Tuition Centre Management\n";
 		if (!loggedin) {
 			runningMain = UserManagementModule(loggedin, currentUser);
 		}
