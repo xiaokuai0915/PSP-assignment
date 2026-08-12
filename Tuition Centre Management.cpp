@@ -72,6 +72,10 @@ inline void readUserandCoursefile(std::vector<User>& allusers) { //inline is a f
 	coursefile.close();
 }
 
+bool is_digit(char c) {
+	return c >= '0' && c <= '9';
+}
+
 //-------------------------------------------------------------------------------------------------------------------------
 // TOOLS
 
@@ -89,13 +93,41 @@ int intgerinputfilter(const std::string& prompt) { // to cout the prompt and get
 			return -2;
 		}
 
-		std::stringstream ss(input); //use stringstream to convert the input string to integer
-		int val;
-		char extra;
+		size_t start_idx = 0;
+		bool is_negative = false;
 
-		if (ss >> val && !(ss >> extra)) { //fetch integer from the stringstream and check if there is any extra character after the integer, if yes, it will return -1 to indicate that the input is not valid
-			return val;
+		if (input[0] == '-') {
+			is_negative = true;
+			start_idx = 1;
 		}
+		else if (input[0] == '+') {
+			start_idx = 1;
+		}
+
+		if (start_idx == input.length()) { //if the input is just a sign, return -1 to indicate that the input is not valid
+			return -1;
+		}
+		
+		for (size_t i = start_idx; i < input.length(); ++i) {
+			if (!is_digit(input[i])) {
+				return -1; //return -1 to indicate that the input is not valid
+			}
+		}
+		
+		int result = 0;
+		for (size_t i = start_idx; i < input.length(); ++i) {
+			result = result * 10 + (input[i] - '0');
+		}
+
+		if (is_negative) {
+			result = -result;
+			return result;
+		}
+
+		if (!is_negative) {
+			return result;
+		}
+		
 		else {
 			return -1; //return -1 to indicate that the input is not valid
 		}
