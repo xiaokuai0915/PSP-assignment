@@ -1,8 +1,6 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
-#include <vector>
-#include <sstream>
 #include <fstream>
 
 // MODELS
@@ -11,34 +9,58 @@ const int Max_Logs = 100; // Maximum number of logs to store
 std::string logActionName[Max_Logs];
 int logMatrix2D[Max_Logs][3];
 int logCounter = 0;
+const int Max_Courses = 50; // Maximum number of courses to store
+int allCourseCount = 20; // Total number of courses available
 
 struct Course {
 	int id = 0;
 	std::string Name = "";
 	double price = 0.0;
 };
-std::vector<Course> allCourse = { //create a course vector to store courses
-		{1,"Mathematics", 100.5},
-		{2,"Problem solving and programming", 200.0},
-		{3,"Science", 350.5}
-};
+
+Course allCourse[Max_Courses] = {
+	{ 1, "Mathematics", 100.0 },
+	{ 2, "Science", 120.0 },
+	{ 3, "English", 80.0 },
+	{ 4, "History", 90.0 },
+	{ 5, "Geography", 110.0 },
+	{ 6, "Art", 70.0 },
+	{ 7, "Music", 75.0 },
+	{ 8, "Physical Education", 85.0 },
+	{ 9, "Computer Science", 130.0 },
+	{ 10, "Economics", 95.0 },
+	{ 11, "Business Studies", 105.0 },
+	{ 12, "Psychology", 115.0 },
+	{ 13, "Sociology", 125.0 },
+	{ 14, "Philosophy", 135.0 },
+	{ 15, "Political Science", 145.0 },
+	{ 16, "Environmental Science", 155.0 },
+	{ 17, "Chemistry", 165.0 },
+	{ 18, "Biology", 175.0 },
+	{ 19, "Physics", 185.0 },
+	{ 20, "Statistics", 195.0 }
+	};
 
 struct User {
 	std::string username;
 	std::string password;
-	std::vector<Course> mypackage;
+	Course mypackage[10];
+	int packageCount = 0;
 	int role = 0;
 };
 
-inline void readUserandCoursefile(std::vector<User>& allusers) { //inline is a function that when multiple files use this header file, it will not copy the whole real function into 
+void readUserandCoursefile(User allusers[], int& allUsersCount) { //inline is a function that when multiple files use this header file, it will not copy the whole real function into 
 	std::ifstream userfile("user.txt");          // its own cpp file, instead, it act like a virtual header file that only one function exist in the header file so that the compiler won't crash due to multiple same file in different cpp file
 	std::ifstream coursefile("user_courses.txt");   //意思是强制系统就算有很多cpp在用report.h，最后只需要融合成一个function，不可以重复复制一样的function,不然我需要写很多次一样的function
 	User tempUser;
+	allUsersCount = 0;
 	//read user.txt file
 	while (userfile >> tempUser.username >> tempUser.password >> tempUser.role) {
 		if (tempUser.role == 0) {
-			tempUser.mypackage.clear();//clear the remain record before starting the next command
-			allusers.push_back(tempUser);
+			tempUser.packageCount = 0;//clear the remain record before starting the next command
+			if (allUsersCount < 100) {
+				allusers[allUsersCount++] = tempUser;
+			}
 		}
 	}
 	userfile.close();
@@ -47,23 +69,26 @@ inline void readUserandCoursefile(std::vector<User>& allusers) { //inline is a f
 	std::string line;
 
 	while (std::getline(coursefile, line)) {
-		std::stringstream ss(line);
-		std::string username, idStr, CourseStr, priceStr;
+		size_t pos1 = line.find(',');
+		size_t pos2 = line.find(',', pos1 + 1);
+		size_t pos3 = line.find(',', pos2 + 1);
 
-		if (std::getline(ss, username, ',') &&
-			std::getline(ss, idStr, ',') &&
-			std::getline(ss, CourseStr, ',') &&
-			std::getline(ss, priceStr, ',')) {
+		if (pos1 != std::string::npos && pos2 != std::string::npos && pos3 != std::string::npos){
+			std::string username = line.substr(0, pos1);
+			std::string idStr = line.substr(pos1 + 1, pos2 - pos1 - 1);
+			std::string CourseStr = line.substr(pos2 + 1, pos3 - pos2 - 1);
+			std::string priceStr = line.substr(pos3 + 1);
 
-			//make a folder to store the value and equalize the models.h
 			Course c;
-			c.id = std::stoi(idStr);   //convert string to int
+			c.id = std::stoi(idStr);
 			c.Name = CourseStr;
-			c.price = std::stod(priceStr);  //convert string to double
+			c.price = std::stod(priceStr);
 
-			for (auto& user : allusers) {  //go back to allusers at line 18
-				if (user.username == username) {    //check if this is the current user
-					user.mypackage.push_back(c); //if this is the current user, put the course that he had selected and put into this currrent user
+			for (int i = 0; i < allUsersCount; ++i) {  //go back to allusers at line 18
+				if (allusers[i].username == username) {    //check if this is the current user
+					if (allusers[i].packageCount < 10) {
+						allusers[i].mypackage[allusers[i].packageCount++] = c;  //store the course into the current user profile
+					}
 					break;
 				}
 			}
@@ -161,14 +186,40 @@ std::string stringinputfilter(const std::string& prompt) {
 
 	}
 }
+
+bool exitConfirm() {
+	while (true) {
+		int choice = intgerinputfilter("Are you sure you want to exit? (1 for Yes, 0 for No): ");
+		if (choice == -1) {
+			std::cout << "Invalid input! Please enter 1 for Yes or 0 for No.\n";
+			continue;
+		}
+		if (choice == -2) {
+			std::cout << "Input cannot be empty! Please enter 1 for Yes or 0 for No.\n";
+			continue;
+		}
+		if (choice == 1) {
+			std::cout << "Thank you for using the program.\nSee you next time!\n\n";
+			return true; // User confirmed exit
+		}
+		else if (choice == 0) {
+			std::cout << "Program termination cancelled!\n";
+			return false; // User canceled exit
+		}
+		else {
+			std::cout << "Invalid input! Please enter 1 for Yes or 0 for No.\n";
+			continue;
+		}
+	}
+}
 //-------------------------------------------------------------------------------------------------------------------------
 // HEADINGS
-void modifyUserPackage(User& currentUser, const std::vector<Course>& allCourse);
-void addCoursetoPackage(User& currentUser, const std::vector<Course>& allCourse);
-void myCourseSummary(User& currentUser, const std::vector<Course>& allCourse);
-void removeCoursefromPackage(User& currentUser, const std::vector<Course>& allCourse);
-void showAllCourses(const std::vector<Course>& allCourse);
-void StudentPackageModule(User& currentUser, const std::vector<Course>& allCourse);
+void modifyUserPackage(User& currentUser, const Course[], int allCourseCount);
+void addCoursetoPackage(User& currentUser, const Course[], int allCourseCount);
+void myCourseSummary(User& currentUser, const Course[], int allCourseCount);
+void removeCoursefromPackage(User& currentUser, const Course[], int allCourseCount);
+void showAllCourses(const Course allCourse[], int allcourseCount);
+void StudentPackageModule(User& currentUser, const Course[], int allCourseCount);
 bool UserManagementModule(bool& loggedin, User& currentUser);
 void ReportingModule();
 void showReportModule();
@@ -263,7 +314,7 @@ int main() {
 				switch (menuChoice) {
 				case 1:
 					std::cout << "\n[!] Opening Student Package Module dashboard......\n";//load the student package module
-					StudentPackageModule(currentUser, allCourse);
+					StudentPackageModule(currentUser, allCourse, allCourseCount);
 					break;
 				case 0:
 					loggedin = false;
@@ -283,51 +334,65 @@ int main() {
 //-------------------------------------------------------------------------------------------------------------------------
 // STORAGE
 void saveUserCourses(const User& currentUser) { //load current user profile
-	std::vector<std::string> otherUserData;  //using vector to temporary save other user profile（and skip the current user one first)
-	std::ifstream infile("user_courses.txt"); //open user_courses.txt file
+	const int MaxLines = 100; // Maximum number of lines to store
+	std::string otherUserData[MaxLines]; // Array to store other users' data
+	int linecount = 0;
+
+	std::ifstream infile("user_courses.txt");
 	std::string line;
 
-	while (std::getline(infile, line)) {  //loop , read all the things inside the file one by one and store into variable line
-		if (line.find(currentUser.username + ",") != 0) { //if the line doesnt have current user name
-			otherUserData.push_back(line);                //store this line (as i mention on row 13) to the vector 
+	while (std::getline(infile, line)) {
+		if (line.find(currentUser.username + ",") != 0) { //if the line does not start with currentUser.username, then store it into otherUserData
+			if (linecount < MaxLines) {
+				otherUserData[linecount++] = line;
+			}
 		}
 	}
-	infile.close();//close the file to avoid error 
+	infile.close();
 
-	std::ofstream outfile("user_courses.txt");//write the file
+	std::ofstream outfile("user_courses.txt");
 
-	for (const auto& l : otherUserData) {//write all the things into the file one by one that alr store in the vector
-		outfile << l << "\n";// l is temporary variable that create on row 22, this is write all the other user profile things back to the file
-	}                        //i m not using ios::app here cuz i face multiplying bug when change user account when using that so i change it to this
-	for (const auto& c : currentUser.mypackage) {//store current user data into the file
-		outfile << currentUser.username << "," << c.id << "," << c.Name << "," << c.price << "\n";
+	for (int i = 0; i < linecount; ++i) {
+		outfile << otherUserData[i] << "\n"; //write all other users' data back to the file
 	}
-	outfile.close();//close the file to avoid error 
+
+	for (int i = 0; i < currentUser.packageCount; ++i) {
+		outfile << currentUser.username << "," 
+				<< currentUser.mypackage[i].id << ","
+				<< currentUser.mypackage[i].Name << ","
+				<< currentUser.mypackage[i].price << "\n"; //write current user's courses to the file
+	}
+	outfile.close();
 }
 
 void loadUserCourses(User& currentUser) {
 	std::ifstream infile("user_courses.txt");//read the file
 	std::string line;
-	currentUser.mypackage.clear();//clean the vector before read
+	currentUser.packageCount = 0; //reset counter
 
 	while (std::getline(infile, line)) {//same as on top, but this time we string more variable to 分类 those stuff out
-		std::stringstream ss(line);//auto process those variable into the format given(and we feed line into the when ss is created instantly everyloop)
-		std::string username, idStr, name, priceStr;
+		size_t pos1 = line.find(',');
+		size_t pos2 = line.find(',', pos1 + 1);
+		size_t pos3 = line.find(',', pos2 + 1);
 
-		if (std::getline(ss, username, ',') &&//when reach , then take the thing before , and put it into variable to 分类
-			std::getline(ss, idStr, ',') &&//&& means if the stuff is correct and can be read then continue to next row
-			std::getline(ss, name, ',') &&
-			std::getline(ss, priceStr, ',')) {
+		if (pos1 != std::string::npos && pos2 != std::string::npos && pos3 != std::string::npos) {
+			std::string username = line.substr(0, pos1);
+			std::string idStr = line.substr(pos1 + 1, pos2 - pos1 - 1);
+			std::string name = line.substr(pos2 + 1, pos3 - pos2 - 1);
+			std::string priceStr = line.substr(pos3 + 1);
 
 			if (username == currentUser.username) {//changing string that taken out from the file to the variable type that could be understand by the compiler
-				Course c;
-				c.id = std::stoi(idStr);// stoi is string to integer
-				c.Name = name;
-				c.price = std::stod(priceStr);//stod is string to double
-				currentUser.mypackage.push_back(c);//
+				if (currentUser.packageCount < 10) {
+					Course c;
+					c.id = std::stoi(idStr);// stoi is string to integer
+					c.Name = name;
+					c.price = std::stod(priceStr);//stod is string to double
+					currentUser.mypackage[currentUser.packageCount] = c;
+					currentUser.packageCount++;
+				}
 			}
-		}
 
+		}
 	}
 	infile.close();//close the file to avoid error 
 }
@@ -582,11 +647,15 @@ void updateUser(User& currentUser) {
 	std::ifstream infile("user.txt");
 	std::string username, password;
 	int role;
-	std::vector<User> userList;
+	
+	const int MaxUsers = 100; // Maximum number of users to store
+	User userList[MaxUsers];
+	int listCount = 0;
 
 	std::string searchUser = stringinputfilter("Enter username to update: ");
 	if (searchUser == currentUser.username) { //don't allow to edit logged in user
 		std::cout << "Cannot update logged in user.\n";
+		infile.close();
 		return;
 	}
 
@@ -603,10 +672,9 @@ void updateUser(User& currentUser) {
 					return;
 				}
 
-				std::ifstream file("Data/user.txt");
+				std::ifstream file("user.txt");
 				std::string fileU, fileP;
 				int fileR;
-
 				while (file >> fileU >> fileP >> fileR) {
 					if (username == fileU && username != searchUser) {
 						std::cout << "Username already exist, please use another username.\n";
@@ -635,19 +703,20 @@ void updateUser(User& currentUser) {
 
 			found = true;
 		}
-		User u; //push all data into userList
-		u.username = username;
-		u.password = password;
-		u.role = role;
-		userList.push_back(u);
+		if (listCount < MaxUsers) { //push all data into userList
+			userList[listCount].username = username;
+			userList[listCount].password = password;
+			userList[listCount].role = role;
+			listCount++;
+		}
 	}
 
 	infile.close();
 
 	if (found) { //rewrites userList into user.txt if got changes
 		std::ofstream outfile("user.txt");
-		for (User& u : userList) {
-			outfile << u.username << " " << u.password << " " << u.role << "\n";
+		for (int i = 0; i < listCount; i++) {
+			outfile << userList[i].username << " " << userList[i].password << " " << userList[i].role << "\n";
 		}
 		outfile.close();
 		std::cout << "User updated.\n";
@@ -661,28 +730,34 @@ void deleteUser(User& currentUser) {
 	std::ifstream infile("user.txt");
 	std::string username, password;
 	int role;
-	std::vector<User> userList;
+
+	const int MaxUsers = 100;
+	User userList[MaxUsers];
+	int listCount = 0;
 
 	std::string searchUser = stringinputfilter("Enter username to delete (Enter 0 to cancel) : ");
 
 	if (searchUser == "0") {
 		std::cout << "Deletion cancelled.\n";
+		infile.close();
 		return;
 	}
 
 	if (searchUser == currentUser.username) { //don't allow to delete logged in user
 		std::cout << "Cannot delete logged in user.\n";
+		infile.close();
 		return;
 	}
 
 	bool found = false;
 	while (infile >> username >> password >> role) {
 		if (username != searchUser) { //push all data accept the user that'll be deleted
-			User u;
-			u.username = username;
-			u.password = password;
-			u.role = role;
-			userList.push_back(u);;
+			if (listCount < MaxUsers) {
+				userList[listCount].username = username;
+				userList[listCount].password = password;
+				userList[listCount].role = role;
+				listCount++;
+			}
 		}
 		else {
 			found = true;
@@ -693,8 +768,8 @@ void deleteUser(User& currentUser) {
 
 	if (found) { //rewrites userList into user.txt if got changes
 		std::ofstream outfile("user.txt");
-		for (User& u : userList) {
-			outfile << u.username << " " << u.password << " " << u.role << "\n";
+		for (int i = 0; i < listCount; i++) {
+			outfile << userList[i].username << " " << userList[i].password << " " << userList[i].role << "\n";
 		}
 		outfile.close();
 		std::cout << "User deleted.\n";
@@ -706,7 +781,7 @@ void deleteUser(User& currentUser) {
 
 void displayUser() {
 	std::ifstream infile("user.txt");
-	std::string username, password; int role;
+	std::string username, password;
 
 	std::cout << std::setfill(' ');
 	std::cout << "\nChoose one option by typing number:\n"
@@ -727,13 +802,17 @@ void displayUser() {
 		}
 	} while (true);
 
-	std::vector<User> allUsers;
+	const int MaxUsers = 100;
+	User allUsers[MaxUsers];
+	int userCount = 0;
 	User temp;
 	while (infile >> temp.username >> temp.password >> temp.role) { //repeats reading a line from user.txt and save into temp until it reaches the end
-		allUsers.push_back(temp); //push data from temp into vector allUsers
+		if (userCount < MaxUsers) {
+			allUsers[userCount++] = temp; //store temp into allUsers array and increase the counter
+		}
 	}
-	for (int i = 0; i < allUsers.size() - 1; i++) { //bubble sort
-		for (int j = 0; j < allUsers.size() - i - 1; j++) {
+	for (int i = 0; i < userCount - 1; i++) { //bubble sort
+		for (int j = 0; j < userCount - i - 1; j++) {
 			std::string lowerCaseName1 = allUsers[j].username; //get the username on the current index
 			std::string lowerCaseName2 = allUsers[j + 1].username; //get the username on the next index
 			for (char& c : lowerCaseName1) { //convert current into lowercase char by char
@@ -757,11 +836,11 @@ void displayUser() {
 
 	switch (displayChoice) {
 	case 1:
-		for (const User& user : allUsers) { //display all user records
+		for (int i = 0; i < userCount; i++) { //display all user records
 			std::cout << "| "
-				<< std::left << std::setw(20) << user.username
+				<< std::left << std::setw(20) << allUsers[i].username
 				<< " | "
-				<< (user.role == 1 ? "Teacher" : "Student")
+				<< (allUsers[i].role == 1 ? "Teacher" : "Student")
 				<< " |\n";
 			totalUser++;
 		}
@@ -770,10 +849,10 @@ void displayUser() {
 		break;
 
 	case 2:
-		for (const User& user : allUsers) { //display teacher records
-			if (user.role == 1) {
+		for (int i = 0; i < userCount; i++) { //display teacher records
+			if (allUsers[i].role == 1) {
 				std::cout << "| "
-					<< std::left << std::setw(20) << user.username
+					<< std::left << std::setw(20) << allUsers[i].username
 					<< " | Teacher |\n";
 				totalUser++;
 			}
@@ -783,10 +862,10 @@ void displayUser() {
 		break;
 
 	case 3:
-		for (const User& user : allUsers) { //display student records
-			if (user.role == 0) {
+		for (int i = 0; i < userCount; i++) { //display student records
+			if (allUsers[i].role == 0) {
 				std::cout << "| "
-					<< std::left << std::setw(20) << user.username
+					<< std::left << std::setw(20) << allUsers[i].username
 					<< " | Student |\n";
 				totalUser++;
 			}
@@ -840,6 +919,7 @@ int login(User& currentUser, bool& loggedin, bool& runningUserManagement) {
 
 bool UserManagementModule(bool& loggedin, User& currentUser) {
 	int choice = 0;
+	bool choiceExit = false;
 	bool runningUserManagement = true; //set it to keep running until true become false
 	if (!loggedin) {
 		while (runningUserManagement) {
@@ -860,8 +940,12 @@ bool UserManagementModule(bool& loggedin, User& currentUser) {
 				login(currentUser, loggedin, runningUserManagement);
 				break;
 			case 0:
-				std::cout << "\nStopping the program. Bye!";
-				return false;
+				std::cout << "\n---Exit comfirmation---\n";
+				choiceExit = exitConfirm();
+				if (choiceExit) {
+					return false;
+				}
+				break;
 			case -2: //-2 means empty input
 				std::cout << "Input cannot be empty. Please enter a valid number.\n";
 				break;
@@ -921,7 +1005,7 @@ bool UserManagementModule(bool& loggedin, User& currentUser) {
 }
 //-------------------------------------------------------------------------------------------------------------------------
 // Student Package Module
-void StudentPackageModule(User& currentUser, const std::vector<Course>& allCourse) {
+void StudentPackageModule(User& currentUser, const Course allCourse[], int allcourseCount) {
 	loadUserCourses(currentUser); //load the current user profile from the text file to the vector
 	loadActionLogs(); //load the previous action logs from the text file to the 1d and 2d array
 	bool running = true; //loop control
@@ -938,21 +1022,21 @@ void StudentPackageModule(User& currentUser, const std::vector<Course>& allCours
 			continue;
 
 		case 1:
-			showAllCourses(allCourse);
+			showAllCourses(allCourse, allcourseCount);
 			break;
 		case 2:
 			std::cout << "\n--- Add Course to Package ---\n";
-			addCoursetoPackage(currentUser, allCourse);
+			addCoursetoPackage(currentUser, allCourse, allcourseCount);
 			break;
 		case 3:
-			myCourseSummary(currentUser, allCourse);
+			myCourseSummary(currentUser, allCourse, allcourseCount);
 			break;
 		case 4:
-			removeCoursefromPackage(currentUser, allCourse);
+			removeCoursefromPackage(currentUser, allCourse, allcourseCount);
 			break;
 
 		case 5:
-			modifyUserPackage(currentUser, allCourse);
+			modifyUserPackage(currentUser, allCourse, allcourseCount);
 			break;
 
 		case 6:
@@ -973,7 +1057,12 @@ void StudentPackageModule(User& currentUser, const std::vector<Course>& allCours
 }
 
 // 1. Add a course to the user's course package
-void addCoursetoPackage(User& currentUser, const std::vector<Course>& allCourse) {
+void addCoursetoPackage(User& currentUser, const Course allCourse[], int allcourseCount) {
+	if (currentUser.packageCount >= 10) {
+		std::cout << "Error: Package is full (Max 10 courses). Cannot add more courses.\n";
+		return;
+	}
+	
 	int id = intgerinputfilter("Enter Course ID to add: "); // Ask user to input the course ID they want to add
 	if (id == -1) {
 		std::cout << "Invalid input. Please try again!\n";
@@ -994,16 +1083,17 @@ void addCoursetoPackage(User& currentUser, const std::vector<Course>& allCourse)
 	}
 	else {
 		bool found = false; // Flag to check if we can find this ID in all available courses
-		for (const auto& c : allCourse) {
-			if (c.id == id) { // Compare with all course IDs one by one
-				currentUser.mypackage.push_back(c); // If found, push it back into the user's package vector
+		for (int i = 0; i < allcourseCount; i++) {
+			if (allCourse[i].id == id) { // Compare with all course IDs one by one
+				currentUser.mypackage[currentUser.packageCount++] = allCourse[i]; // If found, push it back into the user's package vector
 				std::cout << "\n------------------\n";
-				std::cout << "Added " << c.Name << " to package!\n";
+				std::cout << "Added " << allCourse[i].Name << " to package!\n";
 				found = true;
 
 				recordUserAction(id, "ADD", 1, currentUser.username); // Log the action into the 1D/2D arrays and txt file
 				saveUserCourses(currentUser); // Save immediately to prevent data loss if the program closes halfway
 				std::cout << "[DEBUG] Saved the data into the text file.\n";
+				break;
 			}
 		}
 		if (!found) {
@@ -1013,29 +1103,29 @@ void addCoursetoPackage(User& currentUser, const std::vector<Course>& allCourse)
 }
 
 // 2. Display all courses chosen by the current user and calculate the total fee
-void myCourseSummary(User& currentUser, const std::vector<Course>& allCourse) {
-	if (currentUser.mypackage.empty()) {
+void myCourseSummary(User& currentUser, const Course allCourse[], int allcourseCount) {
+	if (currentUser.packageCount == 0) {
 		std::cout << "Your package is currently empty.\n"; // If the package is empty, notify the user
 	}
 
 	std::cout << "\n--- My Package Summary ---\n";
 	double total = 0;
-	for (const auto& c : currentUser.mypackage) { // Loop through every course in the user's package
-		std::cout << "- " << c.Name << " ($" << std::fixed << std::setprecision(2) << c.price << ")\n";
-		total += c.price; // Accumulate the total price
+	for (int i = 0; i < currentUser.packageCount; i++) { // Loop through every course in the user's package
+		std::cout << "- " << currentUser.mypackage[i].Name << " ($" << std::fixed << std::setprecision(2) << currentUser.mypackage[i].price << ")\n";
+		total += currentUser.mypackage[i].price; // Accumulate the total price
 	}
 	std::cout << "Total Fee: $" << std::fixed << std::setprecision(2) << total << "\n"; // Print final total fee
 }
 
 // 3. Remove a course from the user's package
-void removeCoursefromPackage(User& currentUser, const std::vector<Course>& allCourse) {
-	if (currentUser.mypackage.empty()) {
+void removeCoursefromPackage(User& currentUser, const Course allCourse[], int allcourseCount) {
+	if (currentUser.packageCount == 0) {
 		std::cout << "Your package is currently empty.\n";
 	}
 
 	std::cout << "\n--- Remove Course from Package ---\n";
-	for (const auto& c : currentUser.mypackage) { // First, list out what courses the user currently has
-		std::cout << "(ID=" << c.id << ") - " << c.Name << " ($" << std::fixed << std::setprecision(2) << c.price << ")\n";
+	for (int i = 0; i < currentUser.packageCount; i++) { // First, list out what courses the user currently has
+		std::cout << "(ID=" << currentUser.mypackage[i].id << ") - " << currentUser.mypackage[i].Name << " ($" << std::fixed << std::setprecision(2) << currentUser.mypackage[i].price << ")\n";
 	}
 	int id = intgerinputfilter("Enter Course ID to remove: "); // Ask for the course ID to remove
 	if (id == -1) {
@@ -1049,34 +1139,45 @@ void removeCoursefromPackage(User& currentUser, const std::vector<Course>& allCo
 	}
 
 	bool found = false;
-	for (auto it = currentUser.mypackage.begin(); it != currentUser.mypackage.end(); ++it) {
-		if (it->id == id) { // Found the matching ID
-			std::cout << "\nRemoved " << it->Name << " from package!\n";
-			currentUser.mypackage.erase(it); // Erase it from the vector using an iterator
-
-			recordUserAction(id, "REMOVE", 2, currentUser.username); // Log the remove action
+	int removeIndex = -1;
+	for (int i = 0; i < currentUser.packageCount; i++) {
+		if (currentUser.mypackage[i].id == id) {
 			found = true;
+			removeIndex = i;
 			break;
 		}
 	}
+
+	if (found) {
+		std::cout << "Removed " << currentUser.mypackage[removeIndex].Name << " from package.\n";
+		for (int i = removeIndex; i < currentUser.packageCount - 1; i++) {
+			currentUser.mypackage[i] = currentUser.mypackage[i + 1]; // Shift elements to the left to fill the gap
+		}
+		currentUser.packageCount--; // Decrease the count of courses in the package
+		recordUserAction(id, "REMOVE", 2, currentUser.username); // Log the remove action
+		saveUserCourses(currentUser); // Save changes to the text file
+		std::cout << "[DEBUG] Saved the data into the text file.\n";
+	}
+
 	if (!found) {
 		std::cout << "\nCourse ID entered is not found in your package.\n";
 	}
 }
 
 // 4. Modify the user package (remove a course first, then add a new one)
-void modifyUserPackage(User& currentUser, const std::vector<Course>& allCourse) {
-	if (currentUser.mypackage.empty()) {
+void modifyUserPackage(User& currentUser, const Course allCourse[], int allcourseCount) {
+	if (currentUser.packageCount == 0) {
 		std::cout << "Your package is currently empty.\n";
 	}
 
 	std::cout << "\n--- Modify User Package ---\n";
 	std::cout << "Current Courses in Package:\n";
-	for (const auto& c : currentUser.mypackage) {
-		std::cout << c.id << ". " << c.Name << " - $" << std::fixed << std::setprecision(2) << c.price << "\n";
+	for (int i = 0; i < currentUser.packageCount; i++) {
+		std::cout << currentUser.mypackage[i].id << ". " << currentUser.mypackage[i].Name << " - $" << std::fixed << std::setprecision(2) << currentUser.mypackage[i].price << "\n";
 	}
 
 	// Stage 1: Execute the "Remove" operation
+	int removeIndex = -1;
 	while (true) {
 		int removeId = intgerinputfilter("Enter ID to remove (or 0 to cancel/exit): ");
 		if (removeId == 0) {
@@ -1095,18 +1196,21 @@ void modifyUserPackage(User& currentUser, const std::vector<Course>& allCourse) 
 		}
 
 		bool found = false;
-		for (auto it = currentUser.mypackage.begin(); it != currentUser.mypackage.end(); ++it) {
-			if (it->id == removeId) {
-				std::cout << "Removed " << it->Name << " from package.\n";
-				currentUser.mypackage.erase(it); // Successfully erased from package
-
-				recordUserAction(removeId, "MODIFY_REMOVE", 3, currentUser.username); // Log the modify-remove action
+		for (int i = 0; i < currentUser.packageCount; i++) {
+			if (currentUser.mypackage[i].id == removeId) {
+				std::cout << "Removed " << currentUser.mypackage[i].Name << " from package.\n";
+				removeIndex = i;
 				found = true;
 				break;
 			}
 		}
 
 		if (found) {
+			for (int i = removeIndex; i < currentUser.packageCount - 1; i++) {
+				currentUser.mypackage[i] = currentUser.mypackage[i + 1]; // Shift elements to the left to fill the gap
+			}
+			currentUser.packageCount--;
+			recordUserAction(removeId, "MODIFY_REMOVE", 2, currentUser.username); // Log the modify-remove action
 			break; // Break out of this loop if successfully removed, then proceed to the add stage
 		}
 
@@ -1135,8 +1239,8 @@ void modifyUserPackage(User& currentUser, const std::vector<Course>& allCourse) 
 		}
 
 		bool alreadyExists = false;
-		for (const auto& c : currentUser.mypackage) {
-			if (c.id == id) { alreadyExists = true; break; }
+		for (int i = 0; i < currentUser.packageCount; i++) {
+			if (currentUser.mypackage[i].id == id) { alreadyExists = true; break; }
 		}
 
 		if (alreadyExists) {
@@ -1145,36 +1249,41 @@ void modifyUserPackage(User& currentUser, const std::vector<Course>& allCourse) 
 		}
 
 		bool foundCourse = false;
-		for (const auto& c : allCourse) {
-			if (c.id == id) {
-				currentUser.mypackage.push_back(c); // Push the new course in
-				std::cout << "\n------------------\n";
-				std::cout << "Added " << c.Name << " to package!\n";
-
-				recordUserAction(id, "MODIFY_ADD", 3, currentUser.username); // Log the modify-add action
-				saveUserCourses(currentUser); // Save to the text file instantly
-				std::cout << "[DEBUG] Saved the data into the text file.\n";
-				foundCourse = true;
+		for (int i = 0; i < allcourseCount; ++i) {
+			if (allCourse[i].id == id) {
+				if (currentUser.packageCount < 10) {
+					currentUser.mypackage[currentUser.packageCount++] = allCourse[i]; // Add the course to the user's package
+					std::cout << "\n------------------\n";
+					std::cout << "Added " << allCourse[i].Name << " to package!\n";
+					recordUserAction(id, "MODIFY_ADD", 3, currentUser.username); // Log the modify-add action
+					saveUserCourses(currentUser); // Save to the text file instantly
+					std::cout << "[DEBUG] Saved the data into the text file.\n";
+					foundCourse = true;
+					break;
+				}
+				else {
+					std::cout << "Error: Package is full (Max 10 courses). Cannot add more courses.\n";
+				}
 				break;
 			}
-		}
-		if (foundCourse) {
-			break; // Break out of the entire modification loop once added successfully
-		}
+			if (foundCourse) {
+				break; // Break out of the entire modification loop once added successfully
+			}
 
-		if (!foundCourse) {
-			std::cout << "Course not found in the available courses.\n";
-			continue;
+			if (!foundCourse) {
+				std::cout << "Course not found in the available courses.\n";
+				continue;
+			}
 		}
+		break;
 	}
 }
 
 //6 show all courses
-void showAllCourses(const std::vector<Course>& allCourse) {
+void showAllCourses(const Course allCourse[], int allcourseCount){
 	std::cout << "\n--- All Available Courses ---\n";
-	for (const auto& c : allCourse) { /* c is temporary variable, autolet it auto detect the type of variable of c for allCourse that store in vector
-												 const to avoid is telling the compiler to read the file only(no edit to the file)    & direct pass by reference ( no need to copy anymore so faster)*/
-		std::cout << '\n';
+	for (int i = 0; i < allcourseCount; ++i) {
+		const auto& c = allCourse[i];
 		std::cout << "ID= " << c.id << ". " << c.Name << " - $" << c.price << "\n"; //since all the variable type is auto sync so can direct output easily
 	}
 }
@@ -1223,7 +1332,6 @@ void ReportingModule() {
 			break;
 		default:
 			std::cout << "Invalid input. Please enter a valid number.\n";
-			break;
 		}
 
 	}
@@ -1231,31 +1339,30 @@ void ReportingModule() {
 
 //case 1: generate summary report
 void generateSummaryReport() {
-	std::vector<User> allusers;
-	readUserandCoursefile(allusers);   //load the users files from the header、
+	const int MaxUsers = 100;   //declare the max users
+	User allusers[MaxUsers];   //declare the allusers array
+	int userCount = 0;   //initialize the user count
+	readUserandCoursefile(allusers, userCount);   //load the users files from the header
 
-	size_t totalusers = allusers.size();   //size() tells compiler to go and count how many users they are in the allusers
-	if (totalusers == 0) {
+	if (userCount == 0) {
 		std::cout << "System ERROR. No user record found\n";
 		return;
 	}
-	size_t totalenrollments = 0;    //total amount of course taken by student
+	int totalenrollments = 0;    //total amount of course taken by student
 	int zeroCourseStudent = 0;   //student who doesn't has any course taken
 
-	for (const auto user : allusers) {   //read the current user from the text file 
-		size_t studentCourseCount = user.mypackage.size();  //count the user course taken and save into the studentCourseCount
+	for (int i = 0; i < userCount; ++i) {   //read the current user from the text file
+		int studentCourseCount = allusers[i].packageCount;  //count the user course taken and save into the studentCourseCount
 		totalenrollments += studentCourseCount;    //totalenrollments = totalenrollments + studentCourseCount
 		if (studentCourseCount == 0) {   //if compiler found out that this user has zero course, then the user will be save into here
 			zeroCourseStudent++;
 		}
 	}
 
-	//summary report menu
-	//I'm not using setw and setfill due to the weird mechanic from it when I output my menu, so I will just use std::string to act as setw and setfill
 	std::cout << '\n' << std::string(78, '=') << "\n";
 	std::cout << std::string(30, ' ') << "Summary Report\n";
 	std::cout << std::string(78, '=') << '\n';
-	std::cout << "Total student registered: " << std::string(42, '.') << totalusers << " students\n";
+	std::cout << "Total student registered: " << std::string(42, '.') << userCount << " students\n";
 	std::cout << "Total course registered: " << std::string(43, '.') << totalenrollments << " courses\n";
 	if (zeroCourseStudent > 0) {
 		std::cout << "[WARNING] Currently there are " << zeroCourseStudent << " students that doesn't registered any courses!\n";
@@ -1265,11 +1372,13 @@ void generateSummaryReport() {
 
 //case 2: generate detail report
 void generateDetailReport() {
-	std::vector<User> allusers;   //declare the allusers
-	readUserandCoursefile(allusers);    //read file from header
+	const int MaxUsers = 100;
+	User allusers[MaxUsers];
+	int userCount = 0;
+	readUserandCoursefile(allusers, userCount);
 
-	if (allusers.size() == 0) {
-		std::cout << "System ERROR. No user record found.\n";  //error message if there is no txt file
+	if (userCount == 0) {
+		std::cout << "System ERROR. No user record found.\n";
 		return;
 	}
 
@@ -1277,73 +1386,70 @@ void generateDetailReport() {
 	searchUser = stringinputfilter("Enter username to search: ");   //input filter
 	bool founduser = false;
 
-	for (const auto& user : allusers) {
-		if (user.username == searchUser) {
+	for (int i = 0; i < userCount; ++i) {
+		if (allusers[i].username == searchUser) {
 			founduser = true;
 
 			//detail report menu
-			if (user.mypackage.empty()) {   //if the course txt file is empty then give error message
-				std::cout << "\nERROR. This student has not registered any course.\n";  //when they is no course recorded in this user, return an error message
+			if (allusers[i].packageCount == 0) {   //if the course txt file is empty then give error message
+				std::cout << "\nERROR. This student has not registered any course.\n";
 			}
 			else {
-				//detail report menu
 				std::cout << '\n' << std::string(78, '=') << "\n";
 				std::cout << std::string(30, ' ') << "Detailed Report\n";
 				std::cout << std::string(78, '=') << '\n';
-				std::cout << "Name: " << user.username << '\n';
+				std::cout << "Name: " << allusers[i].username << '\n';
 				std::cout << std::string(78, '=') << '\n';
 				std::cout << "[Class Enrolled]\n";
-				std::cout << "Total course taken: " << user.mypackage.size() << '\n';
+				std::cout << "Total course taken: " << allusers[i].packageCount << '\n';
 				std::cout << std::string(78, '-') << '\n';
 				std::cout << std::setfill(' ');
 				std::cout << std::left << std::setw(14) << "Course ID" << std::left << std::setw(46) << "Course Name" << std::right << std::setw(14) << "Price (RM)\n";
 				std::cout << std::string(78, '-') << '\n';
 
-				//a loop for the compiler to load the specific user's course one by one from the course.txt file
-				for (size_t j = 0; j < user.mypackage.size(); ++j) {
-					std::cout << " " << std::left << std::setw(13) << user.mypackage[j].id << std::left << std::setw(46) << user.mypackage[j].Name << std::right << std::setw(6) << "RM " << std::fixed << std::setprecision(2) << user.mypackage[j].price << '\n';
+				for (int j = 0; j < allusers[i].packageCount; ++j) {
+					std::cout << " " << std::left << std::setw(13) << allusers[i].mypackage[j].id << std::left << std::setw(46) << allusers[i].mypackage[j].Name << std::right << std::setw(6) << "RM " << std::fixed << std::setprecision(2) << allusers[i].mypackage[j].price << '\n';
 				}
 				std::cout << std::string(78, '-') << '\n';
 			}
 		}
 	}
 	if (!founduser) {
-		std::cout << "User not found!";  //if the user not found, return error message and end loop
-		founduser = false;
+		std::cout << "User not found!";
 	}
 }
 
 //case 3 
 void calculateStatistic() {
-	std::vector<User> allusers;
-	readUserandCoursefile(allusers);
+	const int MaxUsers = 100;
+	User allusers[MaxUsers];
+	int userCount = 0;
+	readUserandCoursefile(allusers, userCount);
 
-	size_t totalusers = allusers.size();   //size() tells compiler to go and count how many users they are in the allusers
-	if (totalusers == 0) {
+	if (userCount == 0) {
 		std::cout << "System ERROR. No user record found.\n";
 		return;
 	}
 
-	size_t totalenrollment = 0;
+	int totalenrollment = 0;
 	int inactivestudent = 0;
 
-	for (const auto user : allusers) {   //take the data from the txt file and put in here to calculate
-		size_t courseCount = user.mypackage.size();
-		totalenrollment += courseCount;   //totalenrollment = totalenrollment + coursecount, when coursecount = 1, then total is 1, if another user have 2, then is 1+2=3 for total enrollment
+	for (int i = 0; i < userCount; ++i) {
+		int courseCount = allusers[i].packageCount;
+		totalenrollment += courseCount;
 		if (courseCount == 0) {
-			inactivestudent++;  //if the user didnt register any course, it will direct to here
+			inactivestudent++;
 		}
 	}
-	double averageCourseperStudent = static_cast<double>(totalenrollment) / totalusers;   //static_cast is used to get even accurate 小数点
-	double inactiveStudentRate = static_cast<double>(inactivestudent) / totalusers * 100;  //make it into percentage
+	double averageCourseperStudent = static_cast<double>(totalenrollment) / userCount;
+	double inactiveStudentRate = static_cast<double>(inactivestudent) / userCount * 100;
 
-	//calculate statistic menu
 	std::cout << '\n' << std::string(78, '=') << '\n';
 	std::cout << std::string(30, ' ') << "Calculate Statistic\n";
 	std::cout << std::string(78, '=') << '\n';
 	std::cout << "Academic Metrics" << std::string(40, ' ') << "Current Data\n";
 	std::cout << std::string(78, '-') << '\n';
-	std::cout << "Total Students: " << std::string(40, ' ') << totalusers << " students";
+	std::cout << "Total Students: " << std::string(40, ' ') << userCount << " students";
 	std::cout << "\nTotal Enrollments: " << std::string(37, ' ') << totalenrollment << " students";
 	std::cout << "\nAverage Courses Taken per Student: " << std::string(21, ' ') << std::fixed << std::setprecision(1) << averageCourseperStudent << " per students";
 	std::cout << "\nTotal Inactive Students: " << std::string(31, ' ') << inactivestudent << " students";
@@ -1353,73 +1459,71 @@ void calculateStatistic() {
 
 //case 4: sort students'name 
 void sortRecord() {
-	std::vector<User> allusers;
-	readUserandCoursefile(allusers);  //load the files from the header
+	const int MaxUsers = 100;
+	User allusers[MaxUsers];
+	int userCount = 0;
+	readUserandCoursefile(allusers, userCount);
 
-	//check if the txt is create
-	if (allusers.size() == 0) {
+	if (userCount == 0) {
 		std::cout << "System ERROR. No user record found.\n";
 		return;
 	}
 
-	//selection sort
-	size_t n = allusers.size();
-	//outer loop: to decide who should be the first, second, third... etc
-	for (size_t i = 0; i < n - 1; i++) {
-		size_t min_idx = i; //it means that this is the first person who start from alphabet A, then it will put in the first place
-		//inner loop: continue to find other name that is more forward than the previous i 
-		for (size_t j = i + 1; j < n; j++) {
-			if (allusers[j].username < allusers[min_idx].username) {
-				min_idx = j;    //record the person who has closer alphabet
+	for (int i = 0; i < userCount - 1; i++) {
+		int minIndex = i;
+		for (int j = i + 1; j < userCount; ++j) {
+			if (allusers[j].username < allusers[minIndex].username) {
+				minIndex = j;
 			}
 		}
-		if (min_idx != i) {
-			std::swap(allusers[i], allusers[min_idx]); //if the smaller number is not i, then swap place
+		if (minIndex != i) {
+			User temp = allusers[i];
+			allusers[i] = allusers[minIndex];
+			allusers[minIndex] = temp;
 		}
 	}
 
-	//the sort menu
 	std::cout << '\n' << std::string(78, '=') << '\n';
 	std::cout << std::string(30, ' ') << "Sort Menu By Username\n";
 	std::cout << std::string(78, '=') << '\n';
 	std::cout << "No.\tStudent\t\tCourse Taken\n";
 	std::cout << std::string(78, '-') << '\n';
 
-	for (size_t i = 0; i < n; i++) {  //compiler will always start from 0,1,2... This command can force the compiler to start from 1,2,3
-		std::cout << " " << (i + 1) << "\t" << allusers[i].username << "\t\t" << allusers[i].mypackage.size() << " courses" << '\n';
+	for (int i = 0; i < userCount; i++) {
+		std::cout << " " << (i + 1) << "\t" << allusers[i].username << "\t\t" << allusers[i].packageCount << " courses" << '\n';
 		std::cout << std::string(78, '-') << '\n';
 	}
 }
 
 //case 5: display analysis
 void displayAnalysis() {
-	std::vector<User> allusers;
-	readUserandCoursefile(allusers);
+	const int MaxUsers = 100;
+	User allusers[MaxUsers];
+	int userCount = 0;
+	readUserandCoursefile(allusers, userCount);
 
-	size_t totalusers = allusers.size();   //size() tells compiler to go and count how many users they are in the allusers
-	if (totalusers == 0) {
+	if (userCount == 0) {
 		std::cout << "System ERROR. No user record found.\n";
 		return;
 	}
 
-	//menu
 	std::cout << '\n' << std::string(80, '=') << '\n';
 	std::cout << std::string(26, ' ') << "Tuition Centre Analysis\n";
 	std::cout << std::string(80, '=') << '\n';
 	std::cout << "Diagnostic Indicator 1: Zero Course Enrollment Attrtion Risk\n";
 	bool hasriskstudent = false;
 
-	for (const auto& user : allusers) {
-		if (user.mypackage.empty()) {   //if course txt is empty for this user, output the warning message
-			std::cout << "[WARNING] Student " << user.username << " currently have 0 courses registered!\n";
+	for (int i = 0; i < userCount; ++i) {
+		if (allusers[i].packageCount == 0) {
+			std::cout << "[WARNING] Student " << allusers[i].username << " currently have 0 courses registered!\n";
 			hasriskstudent = true;
 		}
 	}
-	if (hasriskstudent) {  //give suggestion for the current user if its true
+	if (hasriskstudent) {
 		std::cout << "\nSYSTEM RECOMMENDATION: Front-desk course consultants should call the\n";
 		std::cout << "student's parents immediately to assist in completing course enrollment.\n";
 	}
-	else { //if its false
+	else {
 		std::cout << "Good! All students have successfully registered their courses, zero loss risk.\n";
 	}
 	std::cout << std::string(80, '-') << '\n';
@@ -1427,17 +1531,17 @@ void displayAnalysis() {
 	std::cout << "Diagnostic Indicator 2: Academic Pressure for elite students\n";
 	bool overloadstudent = false;
 
-	for (const auto& user : allusers) {
-		if (user.mypackage.size() >= 3) {  //if the course registered by the current user is more than equal to 3, give warning message
-			std::cout << "[WARNING] Student " << overloadstudent << " has more or equal to 3 courses registered!\n";
+	for (int i = 0; i < userCount; ++i) {
+		if (allusers[i].packageCount >= 3) {
+			std::cout << "[WARNING] Student " << allusers[i].username << " has more or equal to 3 courses registered!\n";
 			overloadstudent = true;
 		}
 	}
-	if (overloadstudent) {  //if its true, give suggestions
+	if (overloadstudent) {
 		std::cout << "\nSYSTEM RECOMMENDATION: Instructors of each subject should pay closer attention\n";
 		std::cout << "to the follow up of the above student to prevent excessive academic pressure.\n";
 	}
-	else {  //if its false
+	else {
 		std::cout << "Status Normal : No student is currently enrolled in more than three courses; the academic workload is balanced.\n";
 	}
 	std::cout << std::string(80, '-') << '\n';
