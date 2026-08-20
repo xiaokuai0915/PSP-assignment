@@ -50,9 +50,9 @@ struct User {
 	int role = 0;
 };
 
-void readUserandCoursefile(User allusers[], int& allUsersCount) { //inline is a function that when multiple files use this header file, it will not copy the whole real function into 
-	std::ifstream userfile("user.txt");          // its own cpp file, instead, it act like a virtual header file that only one function exist in the header file so that the compiler won't crash due to multiple same file in different cpp file
-	std::ifstream coursefile("user_courses.txt");   //意思是强制系统就算有很多cpp在用report.h，最后只需要融合成一个function，不可以重复复制一样的function,不然我需要写很多次一样的function
+void readUserandCoursefile(User allusers[], int& allUsersCount) { 
+	std::ifstream userfile("user.txt");          
+	std::ifstream coursefile("user_courses.txt");   
 	User tempUser;
 	allUsersCount = 0;
 	//read user.txt file
@@ -940,15 +940,15 @@ void displayUser() {
 	for (int i = 0; i < userCount; i++) {
 		bool display = false;
 		switch (displayChoice) {
-			case 1:
-				display = true;
-				break;
-			case 2:
-				display = (allUsers[i].role == 1);
-				break;
-			case 3:
-				display = (allUsers[i].role == 0);
-				break;
+		case 1:
+			display = true;
+			break;
+		case 2:
+			display = (allUsers[i].role == 1);
+			break;
+		case 3:
+			display = (allUsers[i].role == 0);
+			break;
 		}
 		if (display) {
 			std::cout << "| " << std::left << std::setw(30) << allUsers[i].username
@@ -1388,7 +1388,7 @@ void ReportingModule() {
 		std::cout << "================================\n\n";
 		std::cout << "Choose an option Choose one option by typing number:\n1. Generate Summary Report\n2. Generate Detailed Report\n3. Calculate Statistic\n4. Sort Record\n5. Display Analysis\n0. Back to Admin Menu\n";
 
-		reportchoice = intgerinputfilter("Enter your choice(0-5): ");
+		reportchoice = intgerinputfilter("Enter your choice(0-5): "); //integer filter to filter out any value that is not 0 to 5
 		if (reportchoice == -1) {
 			std::cout << "Invalid input! Please enter a valid number.";
 			continue;
@@ -1434,20 +1434,22 @@ void generateSummaryReport() {
 	readUserandCoursefile(allusers, userCount);   //load the users files from the header
 
 	if (userCount == 0) {
-		std::cout << "System ERROR. No user record found\n";
+		std::cout << "System ERROR. No user record found\n"; //if there is no text file detected, return error message
 		return;
 	}
 	int totalenrollments = 0;    //total amount of course taken by student
 	int zeroCourseStudent = 0;   //student who doesn't has any course taken
 
+	//[i] is an array index that point to the current user's course that is store inside the text file
 	for (int i = 0; i < userCount; ++i) {   //read the current user from the text file
 		int studentCourseCount = allusers[i].packageCount;  //count the user course taken and save into the studentCourseCount
-		totalenrollments += studentCourseCount;    //totalenrollments = totalenrollments + studentCourseCount
-		if (studentCourseCount == 0) {   //if compiler found out that this user has zero course, then the user will be save into here
+		totalenrollments += studentCourseCount;    //totalenrollments = totalenrollments + studentCourseCount, count the course that is added for this user and put into totalenrollments
+		if (studentCourseCount == 0) {   //if compiler found out that this user has zero course, then the user will be record into here
 			zeroCourseStudent++;
 		}
 	}
 
+	//the menu for summary report and load out the results
 	std::cout << '\n' << std::string(78, '=') << "\n";
 	std::cout << std::string(30, ' ') << "Summary Report\n";
 	std::cout << std::string(78, '=') << '\n';
@@ -1475,11 +1477,11 @@ void generateDetailReport() {
 	searchUser = stringinputfilter("Enter username to search: ");   //input filter
 	bool founduser = false;
 
-	for (int i = 0; i < userCount; ++i) {
+	for (int i = 0; i < userCount; ++i) { //used to search the user
 		if (allusers[i].username == searchUser) {
 			founduser = true;
 
-			//detail report menu
+			//detail report menu and load the results
 			if (allusers[i].packageCount == 0) {   //if the course txt file is empty then give error message
 				std::cout << "\nERROR. This student has not registered any course.\n";
 			}
@@ -1487,16 +1489,17 @@ void generateDetailReport() {
 				std::cout << '\n' << std::string(78, '=') << "\n";
 				std::cout << std::string(30, ' ') << "Detailed Report\n";
 				std::cout << std::string(78, '=') << '\n';
-				std::cout << "Name: " << allusers[i].username << '\n';
+				std::cout << "Name: " << allusers[i].username << '\n'; //display the username that had been searched out
 				std::cout << std::string(78, '=') << '\n';
 				std::cout << "[Class Enrolled]\n";
-				std::cout << "Total course taken: " << allusers[i].packageCount << '\n';
+				std::cout << "Total course taken: " << allusers[i].packageCount << '\n'; // display how many course taken by the user
 				std::cout << std::string(78, '-') << '\n';
 				std::cout << std::setfill(' ');
 				std::cout << std::left << std::setw(14) << "Course ID" << std::left << std::setw(46) << "Course Name" << std::right << std::setw(14) << "Price (RM)\n";
 				std::cout << std::string(78, '-') << '\n';
 
-				for (int j = 0; j < allusers[i].packageCount; ++j) {
+				//[j] is an array index that is used to point the current user's course inside the course text file
+				for (int j = 0; j < allusers[i].packageCount; ++j) { //a loop to generate the course id, course name and price one by one depends on how many course does the user have
 					std::cout << " " << std::left << std::setw(13) << allusers[i].mypackage[j].id << std::left << std::setw(46) << allusers[i].mypackage[j].Name << std::right << std::setw(6) << "RM " << std::fixed << std::setprecision(2) << allusers[i].mypackage[j].price << '\n';
 				}
 				std::cout << std::string(78, '-') << '\n';
@@ -1508,7 +1511,7 @@ void generateDetailReport() {
 	}
 }
 
-//case 3 
+//case 3: calculate statistic
 void calculateStatistic() {
 	const int MaxUsers = 100;
 	User allusers[MaxUsers];
@@ -1524,25 +1527,25 @@ void calculateStatistic() {
 	int inactivestudent = 0;
 
 	for (int i = 0; i < userCount; ++i) {
-		int courseCount = allusers[i].packageCount;
-		totalenrollment += courseCount;
-		if (courseCount == 0) {
-			inactivestudent++;
+		int courseCount = allusers[i].packageCount; //used to count how many course 
+		totalenrollment += courseCount; //if one course is added, store into the totalenrollement
+		if (courseCount == 0) { //if there is no course inside the user
+			inactivestudent++; //put the user into here
 		}
 	}
-	double averageCourseperStudent = static_cast<double>(totalenrollment) / userCount;
-	double inactiveStudentRate = static_cast<double>(inactivestudent) / userCount * 100;
+	double averageCourseperStudent = static_cast<double>(totalenrollment) / userCount; //calculate the average course taken by the student
+	double inactiveStudentRate = static_cast<double>(inactivestudent) / userCount * 100; //calculate the percentage of inactivestudent which is without course
 
 	std::cout << '\n' << std::string(78, '=') << '\n';
 	std::cout << std::string(30, ' ') << "Calculate Statistic\n";
 	std::cout << std::string(78, '=') << '\n';
 	std::cout << "Academic Metrics" << std::string(40, ' ') << "Current Data\n";
 	std::cout << std::string(78, '-') << '\n';
-	std::cout << "Total Students: " << std::string(40, ' ') << userCount << " students";
-	std::cout << "\nTotal Enrollments: " << std::string(37, ' ') << totalenrollment << " students";
+	std::cout << "Total Students: " << std::string(40, ' ') << userCount << " students"; //display total student
+	std::cout << "\nTotal Enrollments: " << std::string(37, ' ') << totalenrollment << " students"; //display how many course taken
 	std::cout << "\nAverage Courses Taken per Student: " << std::string(21, ' ') << std::fixed << std::setprecision(1) << averageCourseperStudent << " per students";
-	std::cout << "\nTotal Inactive Students: " << std::string(31, ' ') << inactivestudent << " students";
-	std::cout << "\nTotal Inactive Students Rate: " << std::string(26, ' ') << std::fixed << std::setprecision(1) << inactiveStudentRate << " %\n";
+	std::cout << "\nTotal Inactive Students: " << std::string(31, ' ') << inactivestudent << " students"; //number of inactive student
+	std::cout << "\nTotal Inactive Students Rate: " << std::string(26, ' ') << std::fixed << std::setprecision(1) << inactiveStudentRate << " %\n"; //the rate of inactive student
 	std::cout << std::string(78, '-') << '\n';
 }
 
@@ -1558,17 +1561,19 @@ void sortRecord() {
 		return;
 	}
 
-	for (int i = 0; i < userCount - 1; i++) {
-		int minIndex = i;
-		for (int j = i + 1; j < userCount; ++j) {
-			if (allusers[j].username < allusers[minIndex].username) {
+	//selection sort
+	for (int i = 0; i < userCount - 1; i++) { //outer loop: Track the target position
+		int minIndex = i; //assume the current position i is the smallest alphabet
+		for (int j = i + 1; j < userCount; ++j) { //inner loop: find the real smallest alphabet
+			if (allusers[j].username < allusers[minIndex].username) { //if the alphabet is smaller than the current alphabet, then swap the position
 				minIndex = j;
 			}
 		}
-		if (minIndex != i) {
-			User temp = allusers[i];
-			allusers[i] = allusers[minIndex];
-			allusers[minIndex] = temp;
+		//this is where the alphabet being swap
+		if (minIndex != i) { //this is a check if the minIndex is still equal to i, it means that the position is correct
+			User temp = allusers[i]; //create temporarily user to store the data safely
+			allusers[i] = allusers[minIndex]; //overwrite the current user, such as if C is at i, A is at minIndex, then A will become i 
+			allusers[minIndex] = temp; //while C will become minIndex by putting back the user being saved inside the temp
 		}
 	}
 
@@ -1578,7 +1583,7 @@ void sortRecord() {
 	std::cout << "No.\tStudent\t\tCourse Taken\n";
 	std::cout << std::string(78, '-') << '\n';
 
-	for (int i = 0; i < userCount; i++) {
+	for (int i = 0; i < userCount; i++) { //loop out the user name and courses one by one after sorted
 		std::cout << " " << (i + 1) << "\t" << allusers[i].username << "\t\t" << allusers[i].packageCount << " courses" << '\n';
 		std::cout << std::string(78, '-') << '\n';
 	}
@@ -1599,39 +1604,40 @@ void displayAnalysis() {
 	std::cout << '\n' << std::string(80, '=') << '\n';
 	std::cout << std::string(26, ' ') << "Tuition Centre Analysis\n";
 	std::cout << std::string(80, '=') << '\n';
-	std::cout << "Diagnostic Indicator 1: Zero Course Enrollment Attrtion Risk\n";
+	std::cout << "Diagnostic Indicator 1: Zero Course Enrollment Attrtion Risk\n"; //display the first diagnostic for student who has zero course
 	bool hasriskstudent = false;
 
 	for (int i = 0; i < userCount; ++i) {
-		if (allusers[i].packageCount == 0) {
+		if (allusers[i].packageCount == 0) { //loop the student who has no course registered
 			std::cout << "[WARNING] Student " << allusers[i].username << " currently have 0 courses registered!\n";
 			hasriskstudent = true;
 		}
 	}
-	if (hasriskstudent) {
+	if (hasriskstudent) { //if there are students who doesn't have course taken
 		std::cout << "\nSYSTEM RECOMMENDATION: Front-desk course consultants should call the\n";
 		std::cout << "student's parents immediately to assist in completing course enrollment.\n";
 	}
-	else {
+	else { //if every students have course taken
 		std::cout << "Good! All students have successfully registered their courses, zero loss risk.\n";
 	}
 	std::cout << std::string(80, '-') << '\n';
 
+	//display second diagnostic for good students
 	std::cout << "Diagnostic Indicator 2: Academic Pressure for elite students\n";
 	bool overloadstudent = false;
 
 	for (int i = 0; i < userCount; ++i) {
-		if (allusers[i].packageCount >= 3) {
-			std::cout << "[WARNING] Student " << allusers[i].username << " has more or equal to 3 courses registered!\n";
+		if (allusers[i].packageCount >= 10) { //if the current student has taken more or equal to 10 course, then display the warning message and overloadstudent become true 
+			std::cout << "[WARNING] Student " << allusers[i].username << " has more or equal to 10 courses registered!\n";
 			overloadstudent = true;
 		}
 	}
-	if (overloadstudent) {
+	if (overloadstudent) { //if there is overloadstudent
 		std::cout << "\nSYSTEM RECOMMENDATION: Instructors of each subject should pay closer attention\n";
 		std::cout << "to the follow up of the above student to prevent excessive academic pressure.\n";
 	}
-	else {
-		std::cout << "Status Normal : No student is currently enrolled in more than three courses; the academic workload is balanced.\n";
+	else { //if there is no overloadstudent
+		std::cout << "Status Normal : No student is currently enrolled in more than 10 courses; the academic workload is balanced.\n";
 	}
 	std::cout << std::string(80, '-') << '\n';
 }
