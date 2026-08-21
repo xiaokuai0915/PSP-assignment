@@ -306,6 +306,7 @@ int main() {
 
 				case 2:
 					std::cout << "\n[!] Opening Subject Module dashboard......\n";//load the subject module
+					CourseManagementModule();
 					//subject module
 					break;
 
