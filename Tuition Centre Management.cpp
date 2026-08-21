@@ -17,6 +17,7 @@ struct Course {
 	int id = 0;
 	std::string Name = "";
 	double price = 0.0;
+    double time=0.0;
 };
 
 Course allCourse[Max_Courses] = {
@@ -251,7 +252,7 @@ void sortRecord();
 void displayAnalysis();
 
 //CourseManagementModule
-void CourseManagementModule
+void CourseManagementModule();
 void addnewcourse();
 void viewallcourse();
 void deletecourse();
@@ -1944,7 +1945,7 @@ void updatecourse() {
 			}
 		}
 	}
-
+}
 		
 
 
