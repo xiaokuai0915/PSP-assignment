@@ -50,9 +50,9 @@ struct User {
 	int role = 0;
 };
 
-void readUserandCoursefile(User allusers[], int& allUsersCount) { 
-	std::ifstream userfile("user.txt");          
-	std::ifstream coursefile("user_courses.txt");   
+void readUserandCoursefile(User allusers[], int& allUsersCount) {
+	std::ifstream userfile("user.txt");
+	std::ifstream coursefile("user_courses.txt");
 	User tempUser;
 	allUsersCount = 0;
 	//read user.txt file
@@ -242,6 +242,14 @@ void removeCoursefromPackage(User&, const Course[], int);
 void showAllCourses(const Course[], int);
 void StudentPackageModule(User&, const Course[], int);
 
+// Schedule Module 
+void ScheduleModule(User& currentUser);
+void displayMySchedule(User& currentUser);
+void displayAllSchedules(const Course allCourse[], int allcourseCount);
+void loadUserCourses(User& currentUse);
+void AdminScheduleModule(const Course allCourse[], int allCourseCount);
+void StudentScheduleModule(User& currentUser, const Course allCourse[], int allCourseCount);
+
 // ReportingModule
 void ReportingModule();
 void generateSummaryReport();
@@ -301,7 +309,10 @@ int main() {
 
 				case 3:
 					std::cout << "\n[!] Opening Schedule Module dashboard......\n";//load the schedule module
-					//schedule module
+					std::cout << "\n[->] Press enter to continue";
+					std::cin.get(); system("cls");
+					std::cout << "Tuition Centre Management\n";
+					AdminScheduleModule(allCourse, allCourseCount);
 					break;
 
 				case 4:
@@ -353,6 +364,10 @@ int main() {
 					std::cin.get(); system("cls"); // clear screen after enter is pressed
 					std::cout << "Tuition Centre Management\n";
 					StudentPackageModule(currentUser, allCourse, allCourseCount);
+					break;
+
+				case 2:
+					StudentScheduleModule(currentUser, allCourse, allCourseCount);
 					break;
 
 				case 0:
@@ -1376,6 +1391,225 @@ void showAllCourses(const Course allCourse[], int allcourseCount) {
 		std::cout << "ID= " << c.id << ". " << c.Name << " - $" << c.price << "\n"; //since all the variable type is auto sync so can direct output easily
 	}
 }
+
+//-------------------------------------------------------------------------------------------------------------------------
+// Schedule Module
+struct Schedule {
+	int courseId;
+	std::string day;
+	std::string timeSlot;
+	std::string room;
+};
+
+Schedule allSchedules[20] = {
+	{ 1, "Monday",    "09:00 AM - 11:00 AM", "Room A1" },
+	{ 2, "Monday",    "11:30 AM - 01:30 PM", "Room A2" },
+	{ 3, "Tuesday",   "09:00 AM - 11:00 AM", "Room B1" },
+	{ 4, "Tuesday",   "11:30 AM - 01:30 PM", "Room B2" },
+	{ 5, "Wednesday", "09:00 AM - 11:00 AM", "Room C1" },
+	{ 6, "Wednesday", "11:30 AM - 01:30 PM", "Room C2" },
+	{ 7, "Thursday",  "09:00 AM - 11:00 AM", "Room D1" },
+	{ 8, "Thursday",  "11:30 AM - 01:30 PM", "Room D2" },
+	{ 9, "Friday",    "09:00 AM - 11:00 AM", "Room E1" },
+	{ 10, "Friday",   "11:30 AM - 01:30 PM", "Room E2" },
+	{ 11, "Saturday", "09:00 AM - 11:00 AM", "Room F1" },
+	{ 12, "Saturday", "11:30 AM - 01:30 PM", "Room F2" },
+	{ 13, "Sunday",   "09:00 AM - 11:00 AM", "Room G1" },
+	{ 14, "Sunday",   "11:30 AM - 01:30 PM", "Room G2" },
+	{ 15, "Monday",   "02:00 PM - 04:00 PM", "Room A3" },
+	{ 16, "Tuesday",  "02:00 PM - 04:00 PM", "Room B3" },
+	{ 17, "Wednesday","02:00 PM - 04:00 PM", "Room C3" },
+	{ 18, "Thursday", "02:00 PM - 04:00 PM", "Room D3" },
+	{ 19, "Friday",   "02:00 PM - 04:00 PM", "Room E3" },
+	{ 20, "Saturday", "02:00 PM - 04:00 PM", "Room F3" }
+};
+
+void displayAllSchedules(const Course allCourse[], int allcourseCount) {
+	std::cout << "\n=========================================================================\n";
+	std::cout << "                          CLASS SCHEDULE                           \n";
+	std::cout << "=========================================================================\n";
+	std::cout << std::left << std::setw(6) << "ID"
+		<< std::setw(26) << "Course Name"
+		<< std::setw(15) << "Day"
+		<< std::setw(22) << "Time Slot"
+		<< std::setw(10) << "Room" << "\n";
+	std::cout << "-------------------------------------------------------------------------\n";
+
+	for (int i = 0; i < allcourseCount; ++i) {
+		std::string day = "TBD";
+		std::string time = "TBD";
+		std::string room = "TBD";
+
+		for (int j = 0; j < 20; ++j) {
+			if (allSchedules[j].courseId == allCourse[i].id) {
+				day = allSchedules[j].day;
+				time = allSchedules[j].timeSlot;
+				room = allSchedules[j].room;
+				break;
+			}
+		}
+
+		std::cout << std::left << std::setw(6) << allCourse[i].id
+			<< std::setw(26) << allCourse[i].Name
+			<< std::setw(15) << day
+			<< std::setw(22) << time
+			<< std::setw(10) << room << "\n";
+	}
+	std::cout << "=========================================================================\n";
+}
+
+void displayMySchedule(User& currentUser) {
+	loadUserCourses(currentUser);
+
+	if (currentUser.packageCount == 0) {
+		std::cout << "\n-------------------------------------------------------------------------\n";
+		std::cout << "  [!] Your package is currently empty! No schedule available.\n";
+		std::cout << "      Please go to 'Student Package Module' to add courses first.\n";
+		std::cout << "-------------------------------------------------------------------------\n";
+		std::cout << "\n[->] Press enter to return to menu...";
+		std::cin.get();
+		return;
+	}
+
+	std::cout << "\n=========================================================================\n";
+	std::cout << "                        MY CLASS SCHEDULE                       \n";
+	std::cout << "=========================================================================\n";
+	std::cout << std::left << std::setw(6) << "ID"
+		<< std::setw(26) << "Course Name"
+		<< std::setw(15) << "Day"
+		<< std::setw(22) << "Time Slot"
+		<< std::setw(10) << "Room" << "\n";
+	std::cout << "-------------------------------------------------------------------------\n";
+
+	for (int i = 0; i < currentUser.packageCount; ++i) {
+		int currentId = currentUser.mypackage[i].id;
+		std::string day = "TBD";
+		std::string time = "TBD";
+		std::string room = "TBD";
+
+		for (int j = 0; j < 20; ++j) {
+			if (allSchedules[j].courseId == currentId) {
+				day = allSchedules[j].day;
+				time = allSchedules[j].timeSlot;
+				room = allSchedules[j].room;
+				break;
+			}
+		}
+
+		std::cout << std::left << std::setw(6) << currentId
+			<< std::setw(26) << currentUser.mypackage[i].Name
+			<< std::setw(15) << day
+			<< std::setw(22) << time
+			<< std::setw(10) << room << "\n";
+	}
+	std::cout << "=========================================================================\n";
+}
+
+void ScheduleModule(User& currentUser) {
+	bool runningSchedule = true;
+	while (runningSchedule) {
+		std::cout << "\n--- Schedule Module ---\n"
+			<< "=======================\n"
+			<< "1. View My Class Schedule\n"
+			<< "0. Back to Menu\n"
+			<< "=======================\n";
+
+		int choice = intgerinputfilter("Enter your choice: ");
+		switch (choice) {
+		case 1:
+			displayMySchedule(currentUser);
+			break;
+		case 0:
+			runningSchedule = false;
+			std::cout << "Exiting Schedule Module...\n";
+			break;
+		case -2:
+			std::cout << "Input cannot be empty!\n";
+			break;
+		default:
+			std::cout << "Invalid choice, please try again.\n";
+			break;
+		}
+	}
+}
+void AdminScheduleModule(const Course allCourse[], int allCourseCount) {
+	bool runningAdminSchedule = true;
+	while (runningAdminSchedule) {
+		system("cls");
+		std::cout << "Tuition Centre Management\n";
+		std::cout << "\n--- Admin Schedule Module ---\n"
+			<< "=======================\n"
+			<< "1. View Class Schedule\n"
+			<< "0. Back to Admin Menu\n"
+			<< "=======================\n";
+
+		int schedChoice = intgerinputfilter("Enter your choice (0-1): ");
+
+		switch (schedChoice) {
+		case 1:
+			system("cls");
+			std::cout << "Tuition Centre Management\n";
+			displayAllSchedules(allCourse, allCourseCount);
+			std::cout << "\n[->] Press enter to continue...";
+			std::cin.get();
+			break;
+
+		case 0:
+			runningAdminSchedule = false;
+			std::cout << "Reverting back to Admin menu......\n";
+			clearScreen();
+			break;
+
+		case -1:
+		case -2:
+			std::cout << "Invalid or empty input! Please enter a valid number.\n";
+			std::cout << "\n[->] Press enter to try again...";
+			std::cin.get();
+			break;
+
+		default:
+			std::cout << "Invalid choice! Please enter 0 or 1.\n";
+			std::cout << "\n[->] Press enter to try again...";
+			std::cin.get();
+			break;
+		}
+	}
+}
+void StudentScheduleModule(User& currentUser, const Course allCourse[], int allCourseCount) {
+	loadUserCourses(currentUser);
+	if (currentUser.packageCount == 0) {
+		bool inEmptyScheduleMenu = true;
+		while (inEmptyScheduleMenu) {
+			system("cls");
+			std::cout << "Tuition Centre Management\n";
+			std::cout << "\n-------------------------------------------------------------------------\n";
+			std::cout << "  [!] Your package is currently empty! No schedule available.\n";
+			std::cout << "-------------------------------------------------------------------------\n";
+			std::cout << "1. Go to Student Package Module (Add Courses)\n";
+			std::cout << "0. Back to User Menu\n";
+			std::cout << "=================================================\n";
+
+			int subChoice = intgerinputfilter("Enter your choice: ");
+			if (subChoice == 1) {
+				system("cls");
+				std::cout << "Tuition Centre Management\n";
+				StudentPackageModule(currentUser, allCourse, allCourseCount);
+				inEmptyScheduleMenu = false;
+			}
+			else if (subChoice == 0) {
+				inEmptyScheduleMenu = false;
+			}
+			else {
+				std::cout << "Invalid choice! Press enter to try again.";
+				std::cin.get();
+			}
+		}
+	}
+	else {
+		ScheduleModule(currentUser);
+	}
+}
+
 //-------------------------------------------------------------------------------------------------------------------------
 //Reporting Module
 void ReportingModule() {
