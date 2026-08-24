@@ -17,7 +17,7 @@ struct Course {
 	int id = 0;
 	std::string Name = "";
 	double price = 0.0;
-    double time=0.0;
+    
 };
 
 Course allCourse[Max_Courses] = {
@@ -1653,7 +1653,7 @@ void displayAnalysis() {
 	std::cout << std::string(80, '-') << '\n';
 }
 void CourseManagementModule() {
-		bool running = true;
+	bool running = true;
 	int choice=0;
 
 	while (running) {
@@ -1693,14 +1693,29 @@ void CourseManagementModule() {
 			default:
 				std::cout << "Invalid choice,please try again.\n";
 				break;
+
+
+
+
+
+
 		}
+
+
+
+
 	}
 }
-
 const int MAX_COURSES = 100;
 int coursecount = 0;
 Course allcourse[MAX_COURSES];
-void addnewcourse() {	
+void addnewcourse() {
+
+
+
+
+
+
 	Course newcourse;
 	bool idExists = false;
 
@@ -1714,6 +1729,8 @@ void addnewcourse() {
 
 	}
 	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+
 		
 	for (int i = 0;i < coursecount;i++) {
 		if (allcourse[i].id == newcourse.id) {
@@ -1727,6 +1744,7 @@ void addnewcourse() {
 		std::getline(std::cin, newcourse.Name);
 		if (newcourse.Name.empty()) {
 			std::cout << "course name can not be empty\n";
+
 		}
 		else {
 			break;
@@ -1748,14 +1766,10 @@ void addnewcourse() {
 			break;
 		}
 	}
-	std::cout << "Enter the duration time:";
-	std::cin >> newcourse.time;
-	while (newcourse.time < 0) {
-		std::cout << "Time can not be negative\n";
-		
-		std::cout << "Add course successful!\n";
-		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-	}
+	
+
+
+
 	allcourse[coursecount++] = newcourse;
 }
 
@@ -1766,12 +1780,14 @@ void viewallcourse() {
 
 	}
 	else {
-		std::cout << "id          " << "name         " << "price(RM)        " << "time(hours)         \n";
+		std::cout << "id          " << "name         " << "price(RM)        " <<"      \n";
 		for (int i = 0;i < coursecount;i++) {
 			std::cout << allcourse[i].id << "\t";
 			std::cout << allcourse[i].Name << "\t\t";
 			std::cout << allcourse[i].price << "\t\t";
-			std::cout << allcourse[i].time << std::endl;
+
+
+
 		}
 	}
 }
@@ -1814,10 +1830,15 @@ void deletecourse() {
 			}
 			else {
 				std::cout << "your cancel was deleted\n";
-			}		
 			}
+			
+			}
+
 		}
+
 	}
+
+
 
 void searchcourse() {
 	int searchid;
@@ -1837,20 +1858,27 @@ void searchcourse() {
 		std::cout << "Course list is empty.\n";
 		return;
 	}
-	if (!found) {
-		std::cout << "Course id " << searchid << " not found\n";
-	}
 	for (int i = 0;i < coursecount;i++) {
 		if (searchid == allcourse[i].id) {
 			found = true;
 			std::cout << "course name: " << allcourse[i].Name << "\n";
 			std::cout << "course price:RM " << allcourse[i].price << "\n";
-			std::cout << "course duration time: " << allcourse[i].time << " hour\n";
+
 			break;
 		}
+
+
 	}
+
+	if (!found) {
+		std::cout << "Course id " << searchid << " not found\n";
+	}
+	
+
 }
 void updatecourse() {
+
+
 	int updateid;
 	std::cout << "enter the course id to update information: ";
 	bool found = false;
@@ -1908,14 +1936,19 @@ void updatecourse() {
 				else {
 					allcourse[i].id = newid;
 					std::cout << "Update the course id to " << newid << '\n';
+
+
 				}
 			}
 			
+
 			std::cout << "Enter the new name:";
 
 			std::getline(std::cin, newname);
 			if (newname.empty()) {
 				std::cout << "Course keep unchanged.\n";
+
+
 			}
 			else {
 				allcourse[i].Name = newname;
@@ -1926,27 +1959,24 @@ void updatecourse() {
 			if (newprice >= 0) {
 				allcourse[i].price = newprice;
 				std::cout << "update the price to RM" << newprice << "\n";
-			}
-			else {
-				std::cout << "Price can not be negative,price keep unchanged.\n";
-			}
-			std::cout << "enter the new course time: " << "\n";
-			std::cin >> newtime;
-			if (newtime >= 0) {
-				allcourse[i].time = newtime;
-				std::cout << "update the duration time to " << newtime << "hours" << "\n";
 				std::cout << "==========New course information========= \n";
 				std::cout << "Course id:" << newid << '\n';
 				std::cout << "Course name:" << newname << "\n";
 				std::cout << "Course price :" << newprice << "\n";
-				std::cout << "course duration time: " << newtime << "\n";
 			}
 			else {
-				std::cout << "time can not be negative,time keep unchanged\n";
+				std::cout << "Price can not be negative,price keep unchanged.\n";
+
+
 			}
+			
+			
 		}
 	}
 }
+
+
+
 
 
 
