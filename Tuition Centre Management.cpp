@@ -17,7 +17,7 @@ struct Course {
 	int id = 0;
 	std::string Name = "";
 	double price = 0.0;
-    double time=0.0;
+	double time = 0.0;
 };
 
 Course allCourse[Max_Courses] = {
@@ -298,7 +298,7 @@ int main() {
 				int menuChoice;
 				if (!(std::cin >> menuChoice)) {
 					std::cin.clear();
-					std::cin.ignore(100, '\n');
+					std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 					std::cout << "Invalid input! Please enter a number.\n";
 					continue;
 				}
@@ -362,7 +362,7 @@ int main() {
 				int menuChoice;
 				if (!(std::cin >> menuChoice)) {
 					std::cin.clear();
-					std::cin.ignore(100, '\n');
+					std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 					std::cout << "Invalid input! Please enter a number.\n";
 					continue;
 				}
@@ -1631,7 +1631,7 @@ void ReportingModule() {
 		std::cout << "\n================================\n";
 		std::cout << "|Admin Portal: Reporting module|\n";
 		std::cout << "================================\n\n";
-		std::cout << "Choose an option Choose one option by typing number:\n1. Generate Summary Report\n2. Generate Detailed Report\n3. Calculate Statistic\n4. Sort Record\n5. Display Analysis\n0. Back to Admin Menu\n";
+		std::cout << "Choose one option by typing number:\n1. Generate Summary Report\n2. Generate Detailed Report\n3. Calculate Statistic\n4. Sort Record\n5. Display Analysis\n0. Back to Admin Menu\n";
 
 		reportchoice = intgerinputfilter("Enter your choice(0-5): "); //integer filter to filter out any value that is not 0 to 5
 		if (reportchoice == -1) {
@@ -1887,8 +1887,8 @@ void displayAnalysis() {
 	std::cout << std::string(80, '-') << '\n';
 }
 void CourseManagementModule() {
-		bool running = true;
-	int choice=0;
+	bool running = true;
+	int choice = 0;
 
 	while (running) {
 		std::cin.ignore(std::numeric_limits <std::streamsize>::max(), '\n');
@@ -1896,37 +1896,37 @@ void CourseManagementModule() {
 		std::cout << "Welcome to admin menu\n";
 		std::cout << "=======================================\n";
 		std::cout << "1.Add new course\n" << "2.View all course\n" << "3.Delete a course \n" << "4.Search the course\n" << "5.update the course\n" << "6.logut\n " << "enter your choices\n";
-		
+
 		choice = intgerinputfilter("");
-	
+
 		switch (choice) {
-			case 1:
-				addnewcourse();
-				break;
-				
-			case 2:
-				viewallcourse();
-				break;
+		case 1:
+			addnewcourse();
+			break;
 
-			case 3:
-				deletecourse();
-				break;
+		case 2:
+			viewallcourse();
+			break;
 
-			case 4:
-				searchcourse();
-				break;
+		case 3:
+			deletecourse();
+			break;
 
-			case 5:
-				updatecourse();
-				break;
+		case 4:
+			searchcourse();
+			break;
 
-			case 6:
-				running = false;
+		case 5:
+			updatecourse();
+			break;
 
-				break;
-			default:
-				std::cout << "Invalid choice,please try again.\n";
-				break;
+		case 6:
+			running = false;
+
+			break;
+		default:
+			std::cout << "Invalid choice,please try again.\n";
+			break;
 		}
 	}
 }
@@ -1934,7 +1934,7 @@ void CourseManagementModule() {
 const int MAX_COURSES = 100;
 int coursecount = 0;
 Course allcourse[MAX_COURSES];
-void addnewcourse() {	
+void addnewcourse() {
 	Course newcourse;
 	bool idExists = false;
 
@@ -1948,7 +1948,7 @@ void addnewcourse() {
 
 	}
 	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-		
+
 	for (int i = 0;i < coursecount;i++) {
 		if (allcourse[i].id == newcourse.id) {
 			idExists = true;
@@ -1968,10 +1968,10 @@ void addnewcourse() {
 	}
 	while (true) {
 		std::cout << "Enter your tuition fee:";
-		
+
 		if (!(std::cin >> newcourse.price)) {
 			std::cin.clear();
-			std::cin.ignore(std::numeric_limits <std::streamsize>::max(),'\n');
+			std::cin.ignore(std::numeric_limits <std::streamsize>::max(), '\n');
 			std::cout << "Invalid price please enter again";
 		}
 		if (newcourse.price < 0) {
@@ -1986,7 +1986,7 @@ void addnewcourse() {
 	std::cin >> newcourse.time;
 	while (newcourse.time < 0) {
 		std::cout << "Time can not be negative\n";
-		
+
 		std::cout << "Add course successful!\n";
 		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 	}
@@ -2048,10 +2048,10 @@ void deletecourse() {
 			}
 			else {
 				std::cout << "your cancel was deleted\n";
-			}		
 			}
 		}
 	}
+}
 
 void searchcourse() {
 	int searchid;
@@ -2144,7 +2144,7 @@ void updatecourse() {
 					std::cout << "Update the course id to " << newid << '\n';
 				}
 			}
-			
+
 			std::cout << "Enter the new name:";
 
 			std::getline(std::cin, newname);
@@ -2181,7 +2181,4 @@ void updatecourse() {
 		}
 	}
 }
-
-
-
 //-------------------------------------------------------------------------------------------------------------------------
