@@ -1896,16 +1896,18 @@ void updatecourse() {
 		return;
 
 	}
-	if (!found) {
-		std::cout << "Course id " << updateid << " not found\n";
-	}
+	
 	for (int i = 0;i < coursecount;i++) {
+		
 
 		if (allcourse[i].id == updateid) {
+			found = true;
 			std::cout << "===============Course information now================\n";
 			std::cout << "Course name:" << allcourse[i].Name << "\n";
 			std::cout << "Course price:RM " << allcourse[i].price << "\n";
-			std::cout << "Course duration time: " << allcourse[i].time << "\n";
+			
+
+		
 
 			std::string newname;
 			double newprice = allcourse[i].price;
@@ -1973,7 +1975,11 @@ void updatecourse() {
 			
 		}
 	}
+	if (!found) {
+		std::cout << "Course id " << updateid << " not found \n";
+	}
 }
+
 
 
 
