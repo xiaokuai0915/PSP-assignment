@@ -5,7 +5,7 @@
 #include <cstdlib>
 
 // MODELS
-int mainchoice, teacherCode = 1234;
+const int teacherCode = 1234;
 const int Max_Logs = 100; // Maximum number of logs to store
 std::string logActionName[Max_Logs];
 int logMatrix2D[Max_Logs][3];
@@ -302,7 +302,12 @@ int main() {
 					std::cout << "Invalid input! Please enter a number.\n";
 					continue;
 				}
-				std::cin.ignore(100, '\n');
+				
+				if (menuChoice <= 0) {
+					std::cout << "Negative value input is not allowed!";
+					continue;
+				}
+
 				switch (menuChoice) {
 				case 1:
 					std::cout << "\n[!] Opening User Module dashboard......\n";//load the user management module
@@ -366,7 +371,11 @@ int main() {
 					std::cout << "Invalid input! Please enter a number.\n";
 					continue;
 				}
-				std::cin.ignore(100, '\n');
+				
+				if (menuChoice <= 0) {
+					std::cout << "Negative value input is not allowed!";
+					continue;
+				}
 
 				switch (menuChoice) {
 				case 1:
@@ -1179,15 +1188,16 @@ void addCoursetoPackage(User& currentUser, const Course allCourse[], int allcour
 	}
 
 	int id = intgerinputfilter("Enter Course ID to add: "); // Ask user to input the course ID they want to add
+	if (id == -2) {
+		std::cout << "Input cannot be empty. Please enter a valid number.\n";
+		return;
+	}
+	
 	if (id == -1) {
 		std::cout << "Invalid input. Please try again!\n";
 		return;
 	}
 
-	if (id == -2) {
-		std::cout << "Input cannot be empty. Please enter a valid number.\n";
-		return;
-	}
 
 	bool alreadyExists = false; // Check if the course is already in the user's package
 	for (const auto& c : currentUser.mypackage) {
