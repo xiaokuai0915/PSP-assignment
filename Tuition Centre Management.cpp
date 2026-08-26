@@ -292,7 +292,7 @@ int main() {
 					<< "2. Subject Module\n"
 					<< "3. Schedule Module\n"
 					<< "4. Reporting Module\n"
-					<< "0. Back to Main Menu\n"
+					<< "0. Logout\n"
 					<< "=================================================\n"
 					<< "\nEnter your choice (0-5): ";
 				int menuChoice;
@@ -302,6 +302,7 @@ int main() {
 					std::cout << "Invalid input! Please enter a number.\n";
 					continue;
 				}
+				std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
 				if (menuChoice < 0) {
 					std::cout << "Negative value input is not allowed!";
@@ -319,6 +320,9 @@ int main() {
 
 				case 2:
 					std::cout << "\n[!] Opening Subject Module dashboard......\n";//load the subject module
+					std::cout << "\n[->] Press enter to continue";
+					std::cin.get(); system("cls"); // clear screen after enter is pressed
+					std::cout << "Tuition Centre Management\n";
 					CourseManagementModule();
 					//subject module
 					break;
@@ -361,7 +365,7 @@ int main() {
 					<< "\n\nChoose one option by typing number:\n"
 					<< "1. Student Package Module\n"
 					<< "2. Schedule Module\n"
-					<< "0. Back to Main Menu\n"
+					<< "0. Logout\n"
 					<< "=================================================\n"
 					<< "\nEnter your choice (0-2): ";
 				int menuChoice;
@@ -371,6 +375,7 @@ int main() {
 					std::cout << "Invalid input! Please enter a number.\n";
 					continue;
 				}
+				std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
 				if (menuChoice < 0) {
 					std::cout << "Negative value input is not allowed!";
@@ -387,6 +392,10 @@ int main() {
 					break;
 
 				case 2:
+					std::cout << "\n[!] Opening Schedule Module dashboard......\n";//load the student schedule module
+					std::cout << "\n[->] Press enter to continue";
+					std::cin.get(); system("cls"); // clear screen after enter is pressed
+					std::cout << "Tuition Centre Management\n";
 					StudentScheduleModule(currentUser, allCourse, allCourseCount);
 					break;
 
