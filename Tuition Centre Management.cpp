@@ -5,7 +5,7 @@
 #include <cstdlib>
 
 // MODELS
-int mainchoice, teacherCode = 1234;
+const int teacherCode = 1234;
 const int Max_Logs = 100; // Maximum number of logs to store
 std::string logActionName[Max_Logs];
 int logMatrix2D[Max_Logs][3];
@@ -17,7 +17,7 @@ struct Course {
 	int id = 0;
 	std::string Name = "";
 	double price = 0.0;
-    
+	double time = 0.0;
 };
 
 Course allCourse[Max_Courses] = {
@@ -51,9 +51,9 @@ struct User {
 	int role = 0;
 };
 
-void readUserandCoursefile(User allusers[], int& allUsersCount) { 
-	std::ifstream userfile("user.txt");          
-	std::ifstream coursefile("user_courses.txt");   
+void readUserandCoursefile(User allusers[], int& allUsersCount) {
+	std::ifstream userfile("user.txt");
+	std::ifstream coursefile("user_courses.txt");
 	User tempUser;
 	allUsersCount = 0;
 	//read user.txt file
@@ -243,6 +243,14 @@ void removeCoursefromPackage(User&, const Course[], int);
 void showAllCourses(const Course[], int);
 void StudentPackageModule(User&, const Course[], int);
 
+// Schedule Module 
+void ScheduleModule(User& currentUser);
+void displayMySchedule(User& currentUser);
+void displayAllSchedules(const Course allCourse[], int allcourseCount);
+void loadUserCourses(User& currentUse);
+void AdminScheduleModule(const Course allCourse[], int allCourseCount);
+void StudentScheduleModule(User& currentUser, const Course allCourse[], int allCourseCount);
+
 // ReportingModule
 void ReportingModule();
 void generateSummaryReport();
@@ -290,11 +298,16 @@ int main() {
 				int menuChoice;
 				if (!(std::cin >> menuChoice)) {
 					std::cin.clear();
-					std::cin.ignore(100, '\n');
+					std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 					std::cout << "Invalid input! Please enter a number.\n";
 					continue;
 				}
-				std::cin.ignore(100, '\n');
+				
+				if (menuChoice <= 0) {
+					std::cout << "Negative value input is not allowed!";
+					continue;
+				}
+
 				switch (menuChoice) {
 				case 1:
 					std::cout << "\n[!] Opening User Module dashboard......\n";//load the user management module
@@ -312,7 +325,10 @@ int main() {
 
 				case 3:
 					std::cout << "\n[!] Opening Schedule Module dashboard......\n";//load the schedule module
-					//schedule module
+					std::cout << "\n[->] Press enter to continue";
+					std::cin.get(); system("cls");
+					std::cout << "Tuition Centre Management\n";
+					AdminScheduleModule(allCourse, allCourseCount);
 					break;
 
 				case 4:
@@ -351,11 +367,15 @@ int main() {
 				int menuChoice;
 				if (!(std::cin >> menuChoice)) {
 					std::cin.clear();
-					std::cin.ignore(100, '\n');
+					std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 					std::cout << "Invalid input! Please enter a number.\n";
 					continue;
 				}
-				std::cin.ignore(100, '\n');
+				
+				if (menuChoice <= 0) {
+					std::cout << "Negative value input is not allowed!";
+					continue;
+				}
 
 				switch (menuChoice) {
 				case 1:
@@ -364,6 +384,10 @@ int main() {
 					std::cin.get(); system("cls"); // clear screen after enter is pressed
 					std::cout << "Tuition Centre Management\n";
 					StudentPackageModule(currentUser, allCourse, allCourseCount);
+					break;
+
+				case 2:
+					StudentScheduleModule(currentUser, allCourse, allCourseCount);
 					break;
 
 				case 0:
@@ -1164,15 +1188,16 @@ void addCoursetoPackage(User& currentUser, const Course allCourse[], int allcour
 	}
 
 	int id = intgerinputfilter("Enter Course ID to add: "); // Ask user to input the course ID they want to add
+	if (id == -2) {
+		std::cout << "Input cannot be empty. Please enter a valid number.\n";
+		return;
+	}
+	
 	if (id == -1) {
 		std::cout << "Invalid input. Please try again!\n";
 		return;
 	}
 
-	if (id == -2) {
-		std::cout << "Input cannot be empty. Please enter a valid number.\n";
-		return;
-	}
 
 	bool alreadyExists = false; // Check if the course is already in the user's package
 	for (const auto& c : currentUser.mypackage) {
@@ -1387,6 +1412,225 @@ void showAllCourses(const Course allCourse[], int allcourseCount) {
 		std::cout << "ID= " << c.id << ". " << c.Name << " - $" << c.price << "\n"; //since all the variable type is auto sync so can direct output easily
 	}
 }
+
+//-------------------------------------------------------------------------------------------------------------------------
+// Schedule Module
+struct Schedule {
+	int courseId;
+	std::string day;
+	std::string timeSlot;
+	std::string room;
+};
+
+Schedule allSchedules[20] = {
+	{ 1, "Monday",    "09:00 AM - 11:00 AM", "Room A1" },
+	{ 2, "Monday",    "11:30 AM - 01:30 PM", "Room A2" },
+	{ 3, "Tuesday",   "09:00 AM - 11:00 AM", "Room B1" },
+	{ 4, "Tuesday",   "11:30 AM - 01:30 PM", "Room B2" },
+	{ 5, "Wednesday", "09:00 AM - 11:00 AM", "Room C1" },
+	{ 6, "Wednesday", "11:30 AM - 01:30 PM", "Room C2" },
+	{ 7, "Thursday",  "09:00 AM - 11:00 AM", "Room D1" },
+	{ 8, "Thursday",  "11:30 AM - 01:30 PM", "Room D2" },
+	{ 9, "Friday",    "09:00 AM - 11:00 AM", "Room E1" },
+	{ 10, "Friday",   "11:30 AM - 01:30 PM", "Room E2" },
+	{ 11, "Saturday", "09:00 AM - 11:00 AM", "Room F1" },
+	{ 12, "Saturday", "11:30 AM - 01:30 PM", "Room F2" },
+	{ 13, "Sunday",   "09:00 AM - 11:00 AM", "Room G1" },
+	{ 14, "Sunday",   "11:30 AM - 01:30 PM", "Room G2" },
+	{ 15, "Monday",   "02:00 PM - 04:00 PM", "Room A3" },
+	{ 16, "Tuesday",  "02:00 PM - 04:00 PM", "Room B3" },
+	{ 17, "Wednesday","02:00 PM - 04:00 PM", "Room C3" },
+	{ 18, "Thursday", "02:00 PM - 04:00 PM", "Room D3" },
+	{ 19, "Friday",   "02:00 PM - 04:00 PM", "Room E3" },
+	{ 20, "Saturday", "02:00 PM - 04:00 PM", "Room F3" }
+};
+
+void displayAllSchedules(const Course allCourse[], int allcourseCount) {
+	std::cout << "\n=========================================================================\n";
+	std::cout << "                          CLASS SCHEDULE                           \n";
+	std::cout << "=========================================================================\n";
+	std::cout << std::left << std::setw(6) << "ID"
+		<< std::setw(26) << "Course Name"
+		<< std::setw(15) << "Day"
+		<< std::setw(22) << "Time Slot"
+		<< std::setw(10) << "Room" << "\n";
+	std::cout << "-------------------------------------------------------------------------\n";
+
+	for (int i = 0; i < allcourseCount; ++i) {
+		std::string day = "TBD";
+		std::string time = "TBD";
+		std::string room = "TBD";
+
+		for (int j = 0; j < 20; ++j) {
+			if (allSchedules[j].courseId == allCourse[i].id) {
+				day = allSchedules[j].day;
+				time = allSchedules[j].timeSlot;
+				room = allSchedules[j].room;
+				break;
+			}
+		}
+
+		std::cout << std::left << std::setw(6) << allCourse[i].id
+			<< std::setw(26) << allCourse[i].Name
+			<< std::setw(15) << day
+			<< std::setw(22) << time
+			<< std::setw(10) << room << "\n";
+	}
+	std::cout << "=========================================================================\n";
+}
+
+void displayMySchedule(User& currentUser) {
+	loadUserCourses(currentUser);
+
+	if (currentUser.packageCount == 0) {
+		std::cout << "\n-------------------------------------------------------------------------\n";
+		std::cout << "  [!] Your package is currently empty! No schedule available.\n";
+		std::cout << "      Please go to 'Student Package Module' to add courses first.\n";
+		std::cout << "-------------------------------------------------------------------------\n";
+		std::cout << "\n[->] Press enter to return to menu...";
+		std::cin.get();
+		return;
+	}
+
+	std::cout << "\n=========================================================================\n";
+	std::cout << "                        MY CLASS SCHEDULE                       \n";
+	std::cout << "=========================================================================\n";
+	std::cout << std::left << std::setw(6) << "ID"
+		<< std::setw(26) << "Course Name"
+		<< std::setw(15) << "Day"
+		<< std::setw(22) << "Time Slot"
+		<< std::setw(10) << "Room" << "\n";
+	std::cout << "-------------------------------------------------------------------------\n";
+
+	for (int i = 0; i < currentUser.packageCount; ++i) {
+		int currentId = currentUser.mypackage[i].id;
+		std::string day = "TBD";
+		std::string time = "TBD";
+		std::string room = "TBD";
+
+		for (int j = 0; j < 20; ++j) {
+			if (allSchedules[j].courseId == currentId) {
+				day = allSchedules[j].day;
+				time = allSchedules[j].timeSlot;
+				room = allSchedules[j].room;
+				break;
+			}
+		}
+
+		std::cout << std::left << std::setw(6) << currentId
+			<< std::setw(26) << currentUser.mypackage[i].Name
+			<< std::setw(15) << day
+			<< std::setw(22) << time
+			<< std::setw(10) << room << "\n";
+	}
+	std::cout << "=========================================================================\n";
+}
+
+void ScheduleModule(User& currentUser) {
+	bool runningSchedule = true;
+	while (runningSchedule) {
+		std::cout << "\n--- Schedule Module ---\n"
+			<< "=======================\n"
+			<< "1. View My Class Schedule\n"
+			<< "0. Back to Menu\n"
+			<< "=======================\n";
+
+		int choice = intgerinputfilter("Enter your choice: ");
+		switch (choice) {
+		case 1:
+			displayMySchedule(currentUser);
+			break;
+		case 0:
+			runningSchedule = false;
+			std::cout << "Exiting Schedule Module...\n";
+			break;
+		case -2:
+			std::cout << "Input cannot be empty!\n";
+			break;
+		default:
+			std::cout << "Invalid choice, please try again.\n";
+			break;
+		}
+	}
+}
+void AdminScheduleModule(const Course allCourse[], int allCourseCount) {
+	bool runningAdminSchedule = true;
+	while (runningAdminSchedule) {
+		system("cls");
+		std::cout << "Tuition Centre Management\n";
+		std::cout << "\n--- Admin Schedule Module ---\n"
+			<< "=======================\n"
+			<< "1. View Class Schedule\n"
+			<< "0. Back to Admin Menu\n"
+			<< "=======================\n";
+
+		int schedChoice = intgerinputfilter("Enter your choice (0-1): ");
+
+		switch (schedChoice) {
+		case 1:
+			system("cls");
+			std::cout << "Tuition Centre Management\n";
+			displayAllSchedules(allCourse, allCourseCount);
+			std::cout << "\n[->] Press enter to continue...";
+			std::cin.get();
+			break;
+
+		case 0:
+			runningAdminSchedule = false;
+			std::cout << "Reverting back to Admin menu......\n";
+			clearScreen();
+			break;
+
+		case -1:
+		case -2:
+			std::cout << "Invalid or empty input! Please enter a valid number.\n";
+			std::cout << "\n[->] Press enter to try again...";
+			std::cin.get();
+			break;
+
+		default:
+			std::cout << "Invalid choice! Please enter 0 or 1.\n";
+			std::cout << "\n[->] Press enter to try again...";
+			std::cin.get();
+			break;
+		}
+	}
+}
+void StudentScheduleModule(User& currentUser, const Course allCourse[], int allCourseCount) {
+	loadUserCourses(currentUser);
+	if (currentUser.packageCount == 0) {
+		bool inEmptyScheduleMenu = true;
+		while (inEmptyScheduleMenu) {
+			system("cls");
+			std::cout << "Tuition Centre Management\n";
+			std::cout << "\n-------------------------------------------------------------------------\n";
+			std::cout << "  [!] Your package is currently empty! No schedule available.\n";
+			std::cout << "-------------------------------------------------------------------------\n";
+			std::cout << "1. Go to Student Package Module (Add Courses)\n";
+			std::cout << "0. Back to User Menu\n";
+			std::cout << "=================================================\n";
+
+			int subChoice = intgerinputfilter("Enter your choice: ");
+			if (subChoice == 1) {
+				system("cls");
+				std::cout << "Tuition Centre Management\n";
+				StudentPackageModule(currentUser, allCourse, allCourseCount);
+				inEmptyScheduleMenu = false;
+			}
+			else if (subChoice == 0) {
+				inEmptyScheduleMenu = false;
+			}
+			else {
+				std::cout << "Invalid choice! Press enter to try again.";
+				std::cin.get();
+			}
+		}
+	}
+	else {
+		ScheduleModule(currentUser);
+	}
+}
+
 //-------------------------------------------------------------------------------------------------------------------------
 //Reporting Module
 void ReportingModule() {
@@ -1397,7 +1641,7 @@ void ReportingModule() {
 		std::cout << "\n================================\n";
 		std::cout << "|Admin Portal: Reporting module|\n";
 		std::cout << "================================\n\n";
-		std::cout << "Choose an option Choose one option by typing number:\n1. Generate Summary Report\n2. Generate Detailed Report\n3. Calculate Statistic\n4. Sort Record\n5. Display Analysis\n0. Back to Admin Menu\n";
+		std::cout << "Choose one option by typing number:\n1. Generate Summary Report\n2. Generate Detailed Report\n3. Calculate Statistic\n4. Sort Record\n5. Display Analysis\n0. Back to Admin Menu\n";
 
 		reportchoice = intgerinputfilter("Enter your choice(0-5): "); //integer filter to filter out any value that is not 0 to 5
 		if (reportchoice == -1) {
@@ -1654,7 +1898,7 @@ void displayAnalysis() {
 }
 void CourseManagementModule() {
 	bool running = true;
-	int choice=0;
+	int choice = 0;
 
 	while (running) {
 		std::cin.ignore(std::numeric_limits <std::streamsize>::max(), '\n');
@@ -1662,60 +1906,44 @@ void CourseManagementModule() {
 		std::cout << "Welcome to admin menu\n";
 		std::cout << "=======================================\n";
 		std::cout << "1.Add new course\n" << "2.View all course\n" << "3.Delete a course \n" << "4.Search the course\n" << "5.update the course\n" << "6.logut\n " << "enter your choices\n";
-		
+
 		choice = intgerinputfilter("");
-	
+
 		switch (choice) {
-			case 1:
-				addnewcourse();
-				break;
-				
-			case 2:
-				viewallcourse();
-				break;
+		case 1:
+			addnewcourse();
+			break;
 
-			case 3:
-				deletecourse();
-				break;
+		case 2:
+			viewallcourse();
+			break;
 
-			case 4:
-				searchcourse();
-				break;
+		case 3:
+			deletecourse();
+			break;
 
-			case 5:
-				updatecourse();
-				break;
+		case 4:
+			searchcourse();
+			break;
 
-			case 6:
-				running = false;
+		case 5:
+			updatecourse();
+			break;
 
-				break;
-			default:
-				std::cout << "Invalid choice,please try again.\n";
-				break;
+		case 6:
+			running = false;
 
-
-
-
-
-
+			break;
+		default:
+			std::cout << "Invalid choice,please try again.\n";
+			break;
 		}
-
-
-
-
 	}
 }
 const int MAX_COURSES = 100;
 int allCoursecount = 20;
 
 void addnewcourse() {
-
-
-
-
-
-
 	Course newcourse;
 	bool idExists = false;
 
@@ -1752,10 +1980,10 @@ void addnewcourse() {
 	}
 	while (true) {
 		std::cout << "Enter your tuition fee:";
-		
+
 		if (!(std::cin >> newcourse.price)) {
 			std::cin.clear();
-			std::cin.ignore(std::numeric_limits <std::streamsize>::max(),'\n');
+			std::cin.ignore(std::numeric_limits <std::streamsize>::max(), '\n');
 			std::cout << "Invalid price please enter again";
 		}
 		if (newcourse.price < 0) {
@@ -1766,13 +1994,8 @@ void addnewcourse() {
 			break;
 		}
 	}
-	
-
-
-
 	allCourse[allCoursecount++] = newcourse;
 }
-
 void viewallcourse() {
 	std::cout << "================All course available:================\n";
 	if (allCoursecount == 0) {
@@ -1785,9 +2008,6 @@ void viewallcourse() {
 			std::cout <<std::left<<std::setw(10)<< allCourse[i].id ;
 			std::cout << std::left<<std::setw(35)<<allCourse[i].Name ;
 			std::cout <<std::right<<std::setw(6)<< allCourse[i].price <<"\n";
-
-
-
 		}
 	}
 }
@@ -1831,14 +2051,10 @@ void deletecourse() {
 			else {
 				std::cout << "your cancel was deleted\n";
 			}
-			
 			}
-
 		}
-
 	}
-
-
+}
 
 void searchcourse() {
 	int searchid;
@@ -1866,19 +2082,14 @@ void searchcourse() {
 
 			break;
 		}
-
-
 	}
 
 	if (!found) {
 		std::cout << "Course id " << searchid << " not found\n";
-	}
-	
-
+  }
 }
+
 void updatecourse() {
-
-
 	int updateid;
 	std::cout << "enter the course id to update information: ";
 	bool found = false;
@@ -1894,7 +2105,6 @@ void updatecourse() {
 		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 		std::cout << "No course exists.\n";
 		return;
-
 	}
 	
 	for (int i = 0;i < allCoursecount;i++) {
@@ -1905,16 +2115,12 @@ void updatecourse() {
 			std::cout << "===============Course information now================\n";
 			std::cout << "Course name:" << allCourse[i].Name << "\n";
 			std::cout << "Course price:RM " << allCourse[i].price << "\n";
-			
-
-		
-
+      
 			std::string newname;
 			double newprice = allCourse[i].price;
 			double newtime = allCourse[i].time;
 			int newid = allCourse[i].id;
 			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-
 
 			std::cout << "Enter the new course id: ";
 			std::cin >> newid;
@@ -1932,25 +2138,17 @@ void updatecourse() {
 				}
 				if (idExist) {
 					std::cout << "Course id " << newid << "already exist\n";
-
-
 				}
 				else {
 					allCourse[i].id = newid;
 					std::cout << "Update the course id to " << newid << '\n';
-
-
 				}
 			}
-			
-
 			std::cout << "Enter the new name:";
 
 			std::getline(std::cin, newname);
 			if (newname.empty()) {
 				std::cout << "Course keep unchanged.\n";
-
-
 			}
 			else {
 				allCourse[i].Name = newname;
@@ -1968,19 +2166,11 @@ void updatecourse() {
 			}
 			else {
 				std::cout << "Price can not be negative,price keep unchanged.\n";
-
-
-			}
-			
-			
+			}		
 		}
 	}
 	if (!found) {
 		std::cout << "Course id " << updateid << " not found \n";
 	}
 }
-
-
-
-
 //-------------------------------------------------------------------------------------------------------------------------
