@@ -294,7 +294,7 @@ int main() {
 					<< "4. Reporting Module\n"
 					<< "0. Logout\n"
 					<< "=================================================\n"
-					<< "\nEnter your choice (0-5): ";
+					<< "\nEnter your choice (0-4): ";
 				int menuChoice;
 				if (!(std::cin >> menuChoice)) {
 					std::cin.clear();
@@ -312,34 +312,26 @@ int main() {
 				switch (menuChoice) {
 				case 1:
 					std::cout << "\n[!] Opening User Module dashboard......\n";//load the user management module
-					std::cout << "\n[->] Press enter to continue";
-					std::cin.get(); system("cls"); // clear screen after enter is pressed
-					std::cout << "Tuition Centre Management\n";
+					clearScreen();
 					UserManagementModule(loggedin, currentUser);
 					break;
 
 				case 2:
 					std::cout << "\n[!] Opening Subject Module dashboard......\n";//load the subject module
-					std::cout << "\n[->] Press enter to continue";
-					std::cin.get(); system("cls"); // clear screen after enter is pressed
-					std::cout << "Tuition Centre Management\n";
+					clearScreen();
 					CourseManagementModule();
 					//subject module
 					break;
 
 				case 3:
 					std::cout << "\n[!] Opening Schedule Module dashboard......\n";//load the schedule module
-					std::cout << "\n[->] Press enter to continue";
-					std::cin.get(); system("cls");
-					std::cout << "Tuition Centre Management\n";
+					clearScreen();
 					AdminScheduleModule(allCourse, allCourseCount);
 					break;
 
 				case 4:
 					std::cout << "\n[!] Opening Reporting Module dashboard......\n";//load the report module
-					std::cout << "\n[->] Press enter to continue";
-					std::cin.get(); system("cls"); // clear screen after enter is pressed
-					std::cout << "Tuition Centre Management\n";
+					clearScreen();
 					ReportingModule();
 					break;
 
@@ -347,8 +339,7 @@ int main() {
 					loggedin = false;
 					currentUser = User{};
 					std::cout << "Logging out......\n";
-					std::cout << "\n[->] Press enter to continue";
-					std::cin.get(); system("cls"); std::cout << "Tuition Centre Management\n";
+					clearScreen();
 					break;
 
 				default:
@@ -385,17 +376,13 @@ int main() {
 				switch (menuChoice) {
 				case 1:
 					std::cout << "\n[!] Opening Student Package Module dashboard......\n";//load the student package module
-					std::cout << "\n[->] Press enter to continue";
-					std::cin.get(); system("cls"); // clear screen after enter is pressed
-					std::cout << "Tuition Centre Management\n";
+					clearScreen();
 					StudentPackageModule(currentUser, allCourse, allCourseCount);
 					break;
 
 				case 2:
 					std::cout << "\n[!] Opening Schedule Module dashboard......\n";//load the student schedule module
-					std::cout << "\n[->] Press enter to continue";
-					std::cin.get(); system("cls"); // clear screen after enter is pressed
-					std::cout << "Tuition Centre Management\n";
+					clearScreen();
 					StudentScheduleModule(currentUser, allCourse, allCourseCount);
 					break;
 
@@ -403,8 +390,7 @@ int main() {
 					loggedin = false;
 					currentUser = User{};
 					std::cout << "Logging out......\n";
-					std::cout << "\n[->] Press enter to continue";
-					std::cin.get(); system("cls"); std::cout << "Tuition Centre Management\n";
+					clearScreen();
 					break;
 
 				default:
