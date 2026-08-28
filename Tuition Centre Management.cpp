@@ -1907,7 +1907,7 @@ void displayAnalysis() {
 }
 void CourseManagementModule() {
 	bool running = true;
-	int choice = 0;
+	
 
 	while (running) {
 		std::cin.ignore(std::numeric_limits <std::streamsize>::max(), '\n');
@@ -1915,57 +1915,84 @@ void CourseManagementModule() {
 		std::cout << "Welcome to admin menu\n";
 		std::cout << "=======================================\n";
 		std::cout << "1.Add new course\n" << "2.View all course\n" << "3.Delete a course \n" << "4.Search the course\n" << "5.update the course\n" << "6.logut\n " << "enter your choices\n";
-
-		choice = intgerinputfilter("");
-
+		
+		int choice = intgerinputfilter("");
+	
 		switch (choice) {
-		case 1:
-			addnewcourse();
-			break;
+			case 1:
+				addnewcourse();
+				break;
+				
+			case 2:
+				viewallcourse();
+				break;
 
-		case 2:
-			viewallcourse();
-			break;
+			case 3:
+				deletecourse();
+				break;
 
-		case 3:
-			deletecourse();
-			break;
+			case 4:
+				searchcourse();
+				break;
 
-		case 4:
-			searchcourse();
-			break;
+			case 5:
+				updatecourse();
+				break;
 
-		case 5:
-			updatecourse();
-			break;
+			case 6:
+				running = false;
 
-		case 6:
-			running = false;
+				break;
+			default:
+				std::cout << "Invalid choice,please try again.\n";
+				break;
 
-			break;
-		default:
-			std::cout << "Invalid choice,please try again.\n";
-			break;
+
+
+
+
+
 		}
+
+
+
+
 	}
 }
 const int MAX_COURSES = 100;
 int allCoursecount = 20;
 
 void addnewcourse() {
+
+
+
+
+
+
 	Course newcourse;
 	bool idExists = false;
+	int id = intgerinputfilter("enter a course id:");
 
-	std::cout << "enter a course id:";
 
-	if (!(std::cin >> newcourse.id)) {
-		std::cin.clear();
-		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+	if (id == -1) {
+
 		std::cout << "Invalid course id \n";
+		
 		return;
 
 	}
-	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+	if (id == -2) {
+		std::cout << "Course id can not be empty\n";
+		
+		return;
+	}
+	if (id < 0) {
+		std::cout << "Course id can not be negative\n";
+		
+		return;
+	}
+
+	newcourse.id = id;
 
 
 
@@ -1976,35 +2003,44 @@ void addnewcourse() {
 			continue;
 		}
 	}
-	while (true) {
-		std::cout << "enter the course name:";
-		std::getline(std::cin, newcourse.Name);
-		if (newcourse.Name.empty()) {
+
+	std::string name= stringinputfilter("enter the course name:");
+		
+		if (name.empty()) {
 			std::cout << "course name can not be empty\n";
+			
 
 		}
-		else {
-			break;
-		}
-	}
+		newcourse.Name = name;
+		
+	
 	while (true) {
-		std::cout << "Enter your tuition fee:";
-
-		if (!(std::cin >> newcourse.price)) {
-			std::cin.clear();
-			std::cin.ignore(std::numeric_limits <std::streamsize>::max(), '\n');
+		int price = intgerinputfilter("Enter the course price:");
+		
+		if (price==-1){
 			std::cout << "Invalid price please enter again";
 		}
-		if (newcourse.price < 0) {
+		
+		if (price == -2) {
+			std::cout << "Price can not be empty";
+		}
+		if (price < 0) {
 
 			std::cout << "Price can not be negatif\n";
 		}
 		else {
+			newcourse.price = price;
 			break;
 		}
+		
 	}
+	
+
+
+
 	allCourse[allCoursecount++] = newcourse;
 }
+
 void viewallcourse() {
 	std::cout << "================All course available:================\n";
 	if (allCoursecount == 0) {
@@ -2012,42 +2048,54 @@ void viewallcourse() {
 
 	}
 	else {
-		std::cout << "id          " << "name         " << "                price(RM)        " << "      \n";
+		std::cout << "id          " << "name         " << "                price(RM)        " <<"      \n";
 		for (int i = 0;i < allCoursecount;i++) {
-			std::cout << std::left << std::setw(10) << allCourse[i].id;
-			std::cout << std::left << std::setw(35) << allCourse[i].Name;
-			std::cout << std::right << std::setw(6) << allCourse[i].price << "\n";
+			std::cout <<std::left<<std::setw(10)<< allCourse[i].id ;
+			std::cout << std::left<<std::setw(35)<<allCourse[i].Name ;
+			std::cout <<std::right<<std::setw(6)<< allCourse[i].price <<"\n";
+
+
+
 		}
 	}
 }
 void deletecourse() {
-	int deleteid;
+	
 	bool found = false;
-	std::cout << "Please enter the course id to delete the course:";
-	if (!(std::cin >> deleteid)) {
-		std::cin.clear();
-		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+	int deleteid=intgerinputfilter( "Please enter the course id to delete the course:");
+	if (deleteid==-1){
+		std::cout << "Invalid id,please try again\n";
+		
+		return;
 	}
-
+	if (deleteid==-2) {
+		std::cout << "Input id can not be empty\n";
+		
+		return;
+	}
+	if (deleteid < 0) {
+		std::cout << "Course id can not be negative\n";
+		
+		return;
+	}
 	if (allCoursecount == 0) {
 		std::cout << "No course for delete.This list is emtpy\n";
+		
 		return;
 
 	}
-	if (!found) {
-		std::cout << "Course id " << deleteid << " not found\n";
-	}
+	
 
 	for (int i = 0;i < allCoursecount;i++) {
-		char confirm;
+		
 		if (allCourse[i].id == deleteid) {
 			found = true;
 			std::cout << "found the course:" << allCourse[i].Name << "\n";
 			std::cout << "course id:" << allCourse[i].id << "\n";
-			std::cout << "Are you sure delete this course?(Enter Y/y)\n";
-			std::cin >> confirm;
+			std::string confirm=stringinputfilter( "Are you sure delete this course?(Enter Y/N)\n");
+			
 
-			if (confirm == 'Y' || confirm == 'y') {
+			if (confirm =="Y") {
 				for (int j = i;j < allCoursecount - 1;j++) {
 					allCourse[j] = allCourse[j + 1];
 
@@ -2055,31 +2103,55 @@ void deletecourse() {
 				allCoursecount--;
 
 				std::cout << "delete successful\n";
+				clearScreen();
+				break;
+			}
+			if(confirm=="N") {
+				std::cout << "your cancel was deleted\n";
 				break;
 			}
 			else {
-				std::cout << "your cancel was deleted\n";
+				std::cout << "Invalid input,please try again";
+				break;
 			}
+			
+			}
+
 		}
+	if (!found) {
+		std::cout << "Course id " << deleteid << " not found\n";
+		clearScreen();
 	}
-}
+	}
+
+
 
 void searchcourse() {
-	int searchid;
+	
 	bool found = false;
-	std::cout << "Enter the course id to search course:";
-	if (!(std::cin >> searchid)) {
-
-		std::cin.clear();
-		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+	int searchid=intgerinputfilter( "Enter the course id to search course:");
+	if (searchid==-1){
 		std::cout << "invalid id,please enter again.\n";
+		
 		return;
 
+	}
+	
+	if (searchid == -2) {
+		std::cout << "Input id can not be empty\n";
+		
+		return;
+	}
+	if (searchid < 0) {
+		std::cout << "Course id can not be negative\n";
+		
+		return;
 	}
 	if (allCoursecount == 0) {
 
 
 		std::cout << "Course list is empty.\n";
+		
 		return;
 	}
 	for (int i = 0;i < allCoursecount;i++) {
@@ -2090,33 +2162,50 @@ void searchcourse() {
 
 			break;
 		}
+
+
 	}
 
 	if (!found) {
 		std::cout << "Course id " << searchid << " not found\n";
+		clearScreen();
 	}
+	
+
 }
-
 void updatecourse() {
-	int updateid;
-	std::cout << "enter the course id to update information: ";
-	bool found = false;
-	if (!(std::cin >> updateid)) {
 
-		std::cin.clear();
-		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-		std::cout << "invalid id,please enter again.\n";
+
+	
+	int updateid=intgerinputfilter( "enter the course id to update information: ");
+	bool found = false;
+	if (updateid==-1) {
+		std::cout << "Invalid id,please try again\n";
+		
+		return;
+
+		
+	}
+	if (updateid == -2) {
+		std::cout << "Course id can not be empty\n";
+		
+		return;
+	}
+	if (updateid < 0) {
+		std::cout << "Course id can not be negative\n";
+		
+		return;
 	}
 	if (allCoursecount == 0) {
 
-		std::cin.clear();
-		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+		
 		std::cout << "No course exists.\n";
 		return;
+
 	}
-
+	
 	for (int i = 0;i < allCoursecount;i++) {
-
+		
 
 		if (allCourse[i].id == updateid) {
 			found = true;
@@ -2124,48 +2213,95 @@ void updatecourse() {
 			std::cout << "Course name:" << allCourse[i].Name << "\n";
 			std::cout << "Course price:RM " << allCourse[i].price << "\n";
 
-			std::string newname;
-			double newprice = allCourse[i].price;
-			double newtime = allCourse[i].time;
-			int newid = allCourse[i].id;
-			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-			std::cout << "Enter the new course id: ";
-			std::cin >> newid;
-			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-			if (newid <= 0) {
+
+
+			
+			
+			
+
+
+			int newid = intgerinputfilter("Enter the new course id: ");
+			
+			
+			if (newid > 0 && newid != allCourse[i].id) {
+				bool idExists = false;
+				for (int k = 0;k < allCoursecount;k++) {
+					if (k != i&&allCourse[k].id ==newid) {
+						idExists = true;
+						break;
+					}
+				}
+			
+				
+			    }
+			
+			if (newid == -1) {
+				std::cout << "Invalid id,please try again";
+				
+			
+				return;
+			 }
+			if (newid == -2) {
+				std::cout << "Id can not be emtpy";
+				
+				return;
+			}
+             else if (newid < 0) {
 				std::cout << "id can not be negative \n";
 
 			}
 			else {
 				bool idExist = false;
 				for (int k = 0;k < allCoursecount;k++) {
-					if (k != i && allCourse[k].id == newid)
+					if (k != i && allCourse[k].id == newid) {
 						idExist = true;
-					break;
+						break;
+					}
 				}
 				if (idExist) {
-					std::cout << "Course id " << newid << "already exist\n";
+					std::cout << "Course id " << newid << " already exist\n";
+					break;
+
+
 				}
 				else {
 					allCourse[i].id = newid;
 					std::cout << "Update the course id to " << newid << '\n';
+
+
 				}
 			}
-			std::cout << "Enter the new name:";
+			
 
-			std::getline(std::cin, newname);
+			std::string newname=stringinputfilter( "Enter the new name:");
+			
+			
 			if (newname.empty()) {
 				std::cout << "Course keep unchanged.\n";
+
+
 			}
 			else {
 				allCourse[i].Name = newname;
 				std::cout << "update the course name to " << newname << "\n";
 			}
-			std::cout << "Enter the newprice :";
-			std::cin >> newprice;
+			double newprice=intgerinputfilter( "Enter the newprice :");
+
+			allCourse[i].price = newprice;
+			if (newprice == -1) {
+				std::cout << "Invalid input,please try again\n";
+			
+				return;
+			}
+			if (newprice == -2) {
+				std::cout << "Price can not be empty\n";
+				
+				return;
+			}
+			
 			if (newprice >= 0) {
-				allCourse[i].price = newprice;
+				
 				std::cout << "update the price to RM" << newprice << "\n";
 				std::cout << "==========New course information========= \n";
 				std::cout << "Course id:" << newid << '\n';
@@ -2174,11 +2310,17 @@ void updatecourse() {
 			}
 			else {
 				std::cout << "Price can not be negative,price keep unchanged.\n";
+
+
 			}
+			
+			
 		}
 	}
 	if (!found) {
 		std::cout << "Course id " << updateid << " not found \n";
+		clearScreen();
 	}
 }
+
 //-------------------------------------------------------------------------------------------------------------------------
