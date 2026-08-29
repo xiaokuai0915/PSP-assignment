@@ -109,56 +109,46 @@ bool is_digit(char c) {
 int intgerinputfilter(const std::string& prompt) { // to cout the prompt and get the input from user, then check if it is valid
 	std::cin.clear();
 	std::string input;
-	while (true) {
-		std::cout << prompt;
+	std::cout << prompt;
 
-		if (!std::getline(std::cin, input)) { // read whole line of input and check if it is valid, no matter it is just a space or empty, it will return -2, if the input is not valid(not integer), it will return -1
-			return -1;
-		}
+	if (!std::getline(std::cin, input)) { // read whole line of input and check if it is valid, no matter it is just a space or empty, it will return -2, if the input is not valid(not integer), it will return -1
+		return -1;
+	}
 
-		if (input.empty()) { //if input is empty, return -2 to indicate that the input is empty
-			return -2;
-		}
+	if (input.empty()) { //if input is empty, return -2 to indicate that the input is empty
+		return -2;
+	}
 
-		size_t start_idx = 0;
-		bool is_negative = false;
+	size_t start_idx = 0;
+	bool is_negative = false;
 
-		if (input[0] == '-') {
-			is_negative = true;
-			start_idx = 1;
-		}
-		else if (input[0] == '+') {
-			start_idx = 1;
-		}
+	if (input[0] == '-') {
+		is_negative = true;
+		start_idx = 1;
+	}
+	else if (input[0] == '+') {
+		start_idx = 1;
+	}
+	if (start_idx == input.length()) { //if the input is just a sign, return -1 to indicate that the input is not valid
+		return -1;
+	}
 
-		if (start_idx == input.length()) { //if the input is just a sign, return -1 to indicate that the input is not valid
-			return -1;
-		}
-
-		for (size_t i = start_idx; i < input.length(); ++i) {
-			if (!is_digit(input[i])) {
-				return -1; //return -1 to indicate that the input is not valid
-			}
-		}
-
-		int result = 0;
-		for (size_t i = start_idx; i < input.length(); ++i) {
-			result = result * 10 + (input[i] - '0');
-		}
-
-		if (is_negative) {
-			result = -result;
-			return result;
-		}
-
-		if (!is_negative) {
-			return result;
-		}
-
-		else {
+	for (size_t i = start_idx; i < input.length(); ++i) {
+		if (!is_digit(input[i])) {
 			return -1; //return -1 to indicate that the input is not valid
 		}
 	}
+
+	int result = 0;
+	for (size_t i = start_idx; i < input.length(); ++i) {
+		result = result * 10 + (input[i] - '0');
+	}
+
+	if (is_negative) {
+		result = -result;
+		return result;
+	}
+	return result;	
 }
 
 std::string stringinputfilter(const std::string& prompt) {
@@ -168,10 +158,6 @@ std::string stringinputfilter(const std::string& prompt) {
 		std::cout << prompt;
 		if (!std::getline(std::cin, input)) {
 			return ""; // Return empty string on input failure
-		}
-
-		if (input == "0") {
-			return "0"; // Return 0 if the user inputs "0"
 		}
 
 		if (input.empty()) {
@@ -192,10 +178,6 @@ std::string stringinputfilter(const std::string& prompt) {
 bool exitConfirm() {
 	while (true) {
 		int choice = intgerinputfilter("Are you sure you want to exit? (1 for Yes, 0 for No): ");
-		if (choice == -1) {
-			std::cout << "Invalid input! Please enter 1 for Yes or 0 for No.\n";
-			continue;
-		}
 		if (choice == -2) {
 			std::cout << "Input cannot be empty! Please enter 1 for Yes or 0 for No.\n";
 			continue;
