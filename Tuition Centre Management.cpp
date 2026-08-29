@@ -1948,13 +1948,7 @@ void CourseManagementModule() {
 				break;
 
 
-
-
-
-
 		}
-
-
 
 
 	}
@@ -2034,9 +2028,6 @@ void addnewcourse() {
 		}
 		
 	}
-	
-
-
 
 	allCourse[allCoursecount++] = newcourse;
 }
@@ -2227,18 +2218,6 @@ void updatecourse() {
 			std::cout << "===============Course information now================\n";
 			std::cout << "Course name:" << allCourse[i].Name << "\n";
 			std::cout << "Course price:RM " << allCourse[i].price << "\n";
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 			int newid=0;
