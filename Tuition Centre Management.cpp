@@ -1207,7 +1207,8 @@ void addCoursetoPackage(User& currentUser, const Course allCourse[], int allcour
 // 2. Display all courses chosen by the current user and calculate the total fee
 void myCourseSummary(User& currentUser, const Course allCourse[], int allcourseCount) {
 	if (currentUser.packageCount == 0) {
-		std::cout << "Your package is currently empty.\n"; // If the package is empty, notify the user
+		std::cout << "\nYour package is currently empty.\n"; // If the package is empty, notify the user
+		return; 
 	}
 
 	std::cout << "\n--- My Package Summary ---\n";
