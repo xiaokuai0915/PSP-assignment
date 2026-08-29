@@ -1765,8 +1765,9 @@ void calculateStatistic() {
 			inactivestudent++; //put the user into here
 		}
 	}
-	double averageCourseperStudent = static_cast<double>(totalenrollment) / userCount; //calculate the average course taken by the student
-	double inactiveStudentRate = static_cast<double>(inactivestudent) / userCount * 100; //calculate the percentage of inactivestudent which is without course
+	//statis_cast here is used to show the remainder of the value after calculation.
+	const double averageCourseperStudent = static_cast<double>(totalenrollment) / userCount; //calculate the average course taken by the student
+	const double inactiveStudentRate = static_cast<double>(inactivestudent) / userCount * 100; //calculate the percentage of inactivestudent which is without course
 
 	std::cout << '\n' << std::string(78, '=') << '\n';
 	std::cout << std::string(30, ' ') << "Calculate Statistic\n";
