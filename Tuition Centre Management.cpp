@@ -3046,7 +3046,7 @@ void searchcourse() {
 	
 	int searchid;
     bool found = false;
-	bool idvalid = true;
+	bool idvalid = false;
 	do {
 		idvalid = true;
 		searchid = intgerinputfilter("Enter the course id to search course:");
