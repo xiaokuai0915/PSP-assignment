@@ -1553,7 +1553,7 @@ void loadSchedulesFromFile(Course allCourse[], int& allcourseCount) {
 void displayAllSchedules(const Course allCourse[], int allcourseCount) {
 
 	std::cout << "\n====================================================================================================\n";
-	std::cout << "                                      MASTER CLASS SCHEDULE                                       \n";
+	std::cout << "                                       CLASS SCHEDULE                                       \n";
 	std::cout << "====================================================================================================\n";
 
 	std::cout << std::left
