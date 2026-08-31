@@ -1549,59 +1549,7 @@ void loadSchedulesFromFile(Course allCourse[], int& allcourseCount) {
 	}
 }
 
-// 1. Admin Display All Schedules
-void displayAllSchedules(const Course allCourse[], int allcourseCount) {
-
-	std::cout << "\n====================================================================================================\n";
-	std::cout << "                                       CLASS SCHEDULE                                       \n";
-	std::cout << "====================================================================================================\n";
-
-	std::cout << std::left
-		<< std::setw(6) << "ID"
-		<< std::setw(22) << "Course Name"
-		<< std::setw(20) << "Teacher"
-		<< std::setw(15) << "Day/Date"
-		<< std::setw(25) << "Time"
-		<< std::setw(15) << "Location"
-		<< "\n";
-
-	std::cout << "----------------------------------------------------------------------------------------------------\n";
-
-	if (scheduleCount == 0) {
-
-		std::cout << "No schedule entries found in the system.\n";
-	}
-	else {
-
-		for (int i = 0; i < scheduleCount; ++i) {
-
-			std::string courseName = "Unknown";
-			double price = 0.0;
-
-			getCourseDetails(
-				allCourse,
-				allcourseCount,
-				allSchedules[i].courseId,
-				courseName,
-				price
-			);
-
-			std::cout << std::left
-				<< std::setw(6) << allSchedules[i].courseId
-				<< std::setw(22) << courseName
-				<< std::setw(20) << allSchedules[i].teacherName
-				<< std::setw(15) << allSchedules[i].day
-				<< std::setw(25) << allSchedules[i].timeSlot
-				<< std::setw(15) << allSchedules[i].room
-				<< "\n";
-
-		}
-	}
-
-	std::cout << "====================================================================================================\n";
-}
-
-// 2. Admin Add Schedule
+// 1. Admin Add Schedule
 void addSchedule(Course allCourse[], int& allcourseCount) {
 
 	if (scheduleCount >= Max_Schedules) {
@@ -1682,7 +1630,7 @@ void addSchedule(Course allCourse[], int& allcourseCount) {
 	std::cout << "\n[SUCCESS] Schedule added successfully!\n";
 }
 
-// 3. Admin Update Schedule
+// 2. Admin Update Schedule
 void updateSchedule(Course allCourse[], int& allcourseCount) {
 
 	std::cout << "\n--- Update Schedule ---\n";
@@ -1787,7 +1735,7 @@ void updateSchedule(Course allCourse[], int& allcourseCount) {
 	std::cout << "\n[SUCCESS] Schedule updated successfully!\n";
 }
 
-// 4. Admin Delete Schedule
+// 3. Admin Delete Schedule
 void deleteSchedule(Course allCourse[], int& allcourseCount) {
 
 	std::cout << "\n--- Delete Schedule ---\n";
@@ -1884,7 +1832,7 @@ void deleteSchedule(Course allCourse[], int& allcourseCount) {
 	std::cout << "[+] Course ID and Course Name are retained.\n";
 }
 
-// 5. Admin Search Schedule
+// 4. Admin Search Schedule
 void searchSchedule(const Course allCourse[], int allcourseCount) {
 	std::cout << "\n--- Search Schedule ---\n";
 	int id = intgerinputfilter("Enter Course ID to search (0 to cancel): ");
@@ -1918,6 +1866,58 @@ void searchSchedule(const Course allCourse[], int allcourseCount) {
 	if (!found) {
 		std::cout << "[!] No schedule found for Course ID " << id << ".\n";
 	}
+}
+
+// 5. Admin Display All Schedules
+void displayAllSchedules(const Course allCourse[], int allcourseCount) {
+
+	std::cout << "\n====================================================================================================\n";
+	std::cout << "                                       CLASS SCHEDULE                                       \n";
+	std::cout << "====================================================================================================\n";
+
+	std::cout << std::left
+		<< std::setw(6) << "ID"
+		<< std::setw(22) << "Course Name"
+		<< std::setw(20) << "Teacher"
+		<< std::setw(15) << "Day/Date"
+		<< std::setw(25) << "Time"
+		<< std::setw(15) << "Location"
+		<< "\n";
+
+	std::cout << "----------------------------------------------------------------------------------------------------\n";
+
+	if (scheduleCount == 0) {
+
+		std::cout << "No schedule entries found in the system.\n";
+	}
+	else {
+
+		for (int i = 0; i < scheduleCount; ++i) {
+
+			std::string courseName = "Unknown";
+			double price = 0.0;
+
+			getCourseDetails(
+				allCourse,
+				allcourseCount,
+				allSchedules[i].courseId,
+				courseName,
+				price
+			);
+
+			std::cout << std::left
+				<< std::setw(6) << allSchedules[i].courseId
+				<< std::setw(22) << courseName
+				<< std::setw(20) << allSchedules[i].teacherName
+				<< std::setw(15) << allSchedules[i].day
+				<< std::setw(25) << allSchedules[i].timeSlot
+				<< std::setw(15) << allSchedules[i].room
+				<< "\n";
+
+		}
+	}
+
+	std::cout << "====================================================================================================\n";
 }
 
 //6. Admin Teaching Schedule
@@ -1990,177 +1990,7 @@ void syncStudentPackage(User& currentUser, const Course allCourse[], int allCour
 	currentUser.packageCount = validCount;
 }
 
-// 1.Student Search Schedule 
-void studentSearchSchedule(User& currentUser) {
-	std::cout << "\n--- Search My Schedule ---\n";
-	if (currentUser.packageCount == 0) {
-		std::cout << "[!] Your schedule is empty.\n";
-		return;
-	}
-
-	int id = intgerinputfilter("Enter Course ID to search (0 to cancel): ");
-	if (id <= 0) {
-		std::cout << "[!] Operation cancelled.\n";
-		return;
-	}
-	bool found = false;
-
-	for (int i = 0; i < currentUser.packageCount; ++i) {
-		if (currentUser.mypackage[i].id == id) {
-			std::string day = "TBD", time = "TBD", room = "TBD", teacher = "TBD";
-
-			for (int j = 0; j < scheduleCount; ++j) {
-				if (allSchedules[j].courseId == id) {
-					teacher = allSchedules[j].teacherName;
-					day = allSchedules[j].day;
-					time = allSchedules[j].timeSlot;
-					room = allSchedules[j].room;
-					break;
-				}
-			}
-
-			std::cout << "\n==========================================================================================\n";
-			std::cout << "                        SCHEDULE FOUND                        \n";
-			std::cout << "==========================================================================================\n";
-			std::cout << std::left << std::setw(6) << "ID"
-				<< std::setw(24) << "Course Name"
-				<< std::setw(18) << "Teacher"
-				<< std::setw(12) << "Day"
-				<< std::setw(22) << "Time Slot"
-				<< std::setw(10) << "Room" << "\n";
-			std::cout << "------------------------------------------------------------------------------------------\n";
-			std::cout << std::left << std::setw(6) << currentUser.mypackage[i].id
-				<< std::setw(24) << currentUser.mypackage[i].Name
-				<< std::setw(18) << teacher
-				<< std::setw(12) << day
-				<< std::setw(22) << time
-				<< std::setw(10) << room << "\n";
-			std::cout << "==========================================================================================\n";
-			found = true;
-			break;
-		}
-	}
-
-	if (!found) {
-		std::cout << "[!] Course ID " << id << " is not in your schedule.\n";
-	}
-}
-
-// 2.Student Display My Schedule 
-void displayMySchedule(User& currentUser, Course allCourse[], int allCourseCount) {
-	syncStudentPackage(currentUser, allCourse, allCourseCount);
-
-	if (currentUser.packageCount == 0) { //for new student haven't add course
-		std::cout << "\n=========================================================\n";
-		std::cout << " [!] Your package is currently empty! No schedule available.\n";
-		std::cout << "=========================================================\n";
-		return;
-	}
-
-	std::cout << "\n========================================================================================\n";
-	std::cout << "                                  MY CLASS SCHEDULE                             \n";
-	std::cout << "========================================================================================\n";
-	std::cout << std::left << std::setw(6) << "ID"
-		<< std::setw(24) << "Course Name"
-		<< std::setw(18) << "Teacher"
-		<< std::setw(12) << "Day"
-		<< std::setw(22) << "Time Slot"
-		<< std::setw(10) << "Room" << "\n";
-	std::cout << "----------------------------------------------------------------------------------------\n";
-
-	for (int i = 0; i < currentUser.packageCount; ++i) {
-		int currentId = currentUser.mypackage[i].id;
-		std::string day = "TBD", time = "TBD", room = "TBD", teacher = "TBD";
-
-		for (int k = 0; k < allCourseCount; ++k) {
-			if (allCourse[k].id == currentId) {
-				break;
-			}
-		}
-
-		for (int j = 0; j < scheduleCount; ++j) {
-			if (allSchedules[j].courseId == currentId) {
-				teacher = allSchedules[j].teacherName;
-				day = allSchedules[j].day;
-				time = allSchedules[j].timeSlot;
-				room = allSchedules[j].room;
-				break;
-			}
-		}
-
-		std::cout << std::left << std::setw(6) << currentId
-			<< std::setw(24) << currentUser.mypackage[i].Name
-			<< std::setw(18) << teacher
-			<< std::setw(12) << day
-			<< std::setw(22) << time
-			<< std::setw(10) << room << "\n";
-	}
-	std::cout << "========================================================================================\n";
-}
-
-// 4. Student Delete Schedule
-void studentDeleteSchedule(User& currentUser)
-{
-	if (currentUser.packageCount == 0)
-	{
-		std::cout << "\n[!] You do not have any courses in your package.\n";
-		return;
-	}
-
-	std::cout << "\n========== DELETE MY SCHEDULE ==========\n";
-	int id = intgerinputfilter("Enter Course ID to delete (0 to cancel): ");
-	if (id == 0)
-	{
-		std::cout << "[!] Operation cancelled.\n";
-		return;
-	}
-	if (id < 0)
-	{
-		std::cout << "[!] Invalid Course ID.\n";
-		return;
-	}
-	int foundIndex = -1;
-
-	// Find the course inside student's package
-	for (int i = 0; i < currentUser.packageCount; ++i) {
-		if (currentUser.mypackage[i].id == id) {
-			foundIndex = i;
-			break;
-		}
-	}
-
-	// Course not found
-	if (foundIndex == -1) {
-		std::cout << "[!] This Course ID is not in your schedule.\n";
-		return;
-	}
-
-	std::cout << "\nCourse found: " << currentUser.mypackage[foundIndex].Name << "\n";
-	int confirm = intgerinputfilter("Are you sure you want to delete this schedule? (1 = Yes, 0 = No): ");
-
-	if (confirm == 0) {
-		std::cout << "[!] Delete cancelled.\n";
-		return;
-	}
-	if (confirm != 1) {
-		std::cout << "[!] Invalid choice.\n";
-		return;
-	}
-
-	// Shift the remaining courses to the left
-	for (int i = foundIndex; i < currentUser.packageCount - 1; ++i) {
-		currentUser.mypackage[i] = currentUser.mypackage[i + 1];
-	}
-
-	currentUser.packageCount--;
-
-	// Save the updated student package
-	saveUserCourses(currentUser);
-
-	std::cout << "\n[SUCCESS] Schedule deleted successfully!\n";
-}
-
-// 5. Student Check Schedule Changes
+// 1. Student Check Schedule Changes
 void saveScheduleChanges() {
 	std::ofstream file("schedule_changes.txt");
 	if (!file) {
@@ -2259,7 +2089,7 @@ void checkScheduleChanges(User& currentUser) {
 	std::cout << "=========================================\n";
 }
 
-// 6. Student Update Schedule
+// 2. Student Update Schedule
 void studentUpdateSchedule(User& currentUser) {
 	std::cout << "\n=========================================\n";
 	std::cout << "          UPDATE MY SCHEDULE             \n";
@@ -2299,11 +2129,7 @@ void studentUpdateSchedule(User& currentUser) {
 	}
 	int scheduleIndex = -1;
 	for (int i = 0; i < scheduleCount; ++i) {
-		if (allSchedules[i].courseId == courseId &&
-			allSchedules[i].day != "-" &&
-			allSchedules[i].timeSlot != "-" &&
-			allSchedules[i].room != "-") {
-
+		if (allSchedules[i].courseId == courseId && allSchedules[i].day != "-" && allSchedules[i].timeSlot != "-" && allSchedules[i].room != "-") {
 			scheduleIndex = i;
 			break;
 		}
@@ -2444,6 +2270,178 @@ void studentUpdateSchedule(User& currentUser) {
 	std::cout << "=========================================\n";
 }
 
+// 3. Student Delete Schedule
+void studentDeleteSchedule(User& currentUser)
+{
+	if (currentUser.packageCount == 0)
+	{
+		std::cout << "\n[!] You do not have any courses in your package.\n";
+		return;
+	}
+
+	std::cout << "\n========== DELETE MY SCHEDULE ==========\n";
+	int id = intgerinputfilter("Enter Course ID to delete (0 to cancel): ");
+	if (id == 0)
+	{
+		std::cout << "[!] Operation cancelled.\n";
+		return;
+	}
+	if (id < 0)
+	{
+		std::cout << "[!] Invalid Course ID.\n";
+		return;
+	}
+	int foundIndex = -1;
+
+	// Find the course inside student's package
+	for (int i = 0; i < currentUser.packageCount; ++i) {
+		if (currentUser.mypackage[i].id == id) {
+			foundIndex = i;
+			break;
+		}
+	}
+
+	// Course not found
+	if (foundIndex == -1) {
+		std::cout << "[!] This Course ID is not in your schedule.\n";
+		return;
+	}
+
+	std::cout << "\nCourse found: " << currentUser.mypackage[foundIndex].Name << "\n";
+	int confirm = intgerinputfilter("Are you sure you want to delete this schedule? (1 = Yes, 0 = No): ");
+
+	if (confirm == 0) {
+		std::cout << "[!] Delete cancelled.\n";
+		return;
+	}
+	if (confirm != 1) {
+		std::cout << "[!] Invalid choice.\n";
+		return;
+	}
+
+	// Shift the remaining courses to the left
+	for (int i = foundIndex; i < currentUser.packageCount - 1; ++i) {
+		currentUser.mypackage[i] = currentUser.mypackage[i + 1];
+	}
+
+	currentUser.packageCount--;
+
+	// Save the updated student package
+	saveUserCourses(currentUser);
+
+	std::cout << "\n[SUCCESS] Schedule deleted successfully!\n";
+}
+
+// 4.Student Search Schedule 
+void studentSearchSchedule(User& currentUser) {
+	std::cout << "\n--- Search My Schedule ---\n";
+	if (currentUser.packageCount == 0) {
+		std::cout << "[!] Your schedule is empty.\n";
+		return;
+	}
+
+	int id = intgerinputfilter("Enter Course ID to search (0 to cancel): ");
+	if (id <= 0) {
+		std::cout << "[!] Operation cancelled.\n";
+		return;
+	}
+	bool found = false;
+
+	for (int i = 0; i < currentUser.packageCount; ++i) {
+		if (currentUser.mypackage[i].id == id) {
+			std::string day = "TBD", time = "TBD", room = "TBD", teacher = "TBD";
+
+			for (int j = 0; j < scheduleCount; ++j) {
+				if (allSchedules[j].courseId == id) {
+					teacher = allSchedules[j].teacherName;
+					day = allSchedules[j].day;
+					time = allSchedules[j].timeSlot;
+					room = allSchedules[j].room;
+					break;
+				}
+			}
+
+			std::cout << "\n==========================================================================================\n";
+			std::cout << "                        SCHEDULE FOUND                        \n";
+			std::cout << "==========================================================================================\n";
+			std::cout << std::left << std::setw(6) << "ID"
+				<< std::setw(24) << "Course Name"
+				<< std::setw(18) << "Teacher"
+				<< std::setw(12) << "Day"
+				<< std::setw(22) << "Time Slot"
+				<< std::setw(10) << "Room" << "\n";
+			std::cout << "------------------------------------------------------------------------------------------\n";
+			std::cout << std::left << std::setw(6) << currentUser.mypackage[i].id
+				<< std::setw(24) << currentUser.mypackage[i].Name
+				<< std::setw(18) << teacher
+				<< std::setw(12) << day
+				<< std::setw(22) << time
+				<< std::setw(10) << room << "\n";
+			std::cout << "==========================================================================================\n";
+			found = true;
+			break;
+		}
+	}
+
+	if (!found) {
+		std::cout << "[!] Course ID " << id << " is not in your schedule.\n";
+	}
+}
+
+// 6.Student Display My Schedule 
+void displayMySchedule(User& currentUser, Course allCourse[], int allCourseCount) {
+	syncStudentPackage(currentUser, allCourse, allCourseCount);
+
+	if (currentUser.packageCount == 0) { //for new student haven't add course
+		std::cout << "\n=========================================================\n";
+		std::cout << " [!] Your package is currently empty! No schedule available.\n";
+		std::cout << "=========================================================\n";
+		return;
+	}
+
+	std::cout << "\n========================================================================================\n";
+	std::cout << "                                  MY CLASS SCHEDULE                             \n";
+	std::cout << "========================================================================================\n";
+	std::cout << std::left << std::setw(6) << "ID"
+		<< std::setw(24) << "Course Name"
+		<< std::setw(18) << "Teacher"
+		<< std::setw(12) << "Day"
+		<< std::setw(22) << "Time Slot"
+		<< std::setw(10) << "Room" << "\n";
+	std::cout << "----------------------------------------------------------------------------------------\n";
+
+	for (int i = 0; i < currentUser.packageCount; ++i) {
+		int currentId = currentUser.mypackage[i].id;
+		std::string day = "TBD", time = "TBD", room = "TBD", teacher = "TBD";
+
+		for (int k = 0; k < allCourseCount; ++k) {
+			if (allCourse[k].id == currentId) {
+				break;
+			}
+		}
+
+		for (int j = 0; j < scheduleCount; ++j) {
+			if (allSchedules[j].courseId == currentId) {
+				teacher = allSchedules[j].teacherName;
+				day = allSchedules[j].day;
+				time = allSchedules[j].timeSlot;
+				room = allSchedules[j].room;
+				break;
+			}
+		}
+
+		std::cout << std::left << std::setw(6) << currentId
+			<< std::setw(24) << currentUser.mypackage[i].Name
+			<< std::setw(18) << teacher
+			<< std::setw(12) << day
+			<< std::setw(22) << time
+			<< std::setw(10) << room << "\n";
+	}
+	std::cout << "========================================================================================\n";
+}
+
+
+
 
 // Admin Schedule Dashboard
 void ScheduleModule(User& currentUser, Course allCourse[], int& allcourseCount) {
@@ -2511,12 +2509,12 @@ void studentScheduleModule(User& currentUser, Course allCourse[], int allCourseC
 		std::cout << "\n=========================================\n";
 		std::cout << "            STUDENT SCHEDULE        \n";
 		std::cout << "=========================================\n";
-		std::cout << "1. Search My Schedule\n";
-		std::cout << "2. Display My Schedule\n";
-		std::cout << "3. Display All Schedule\n";
-		std::cout << "4. Delete My Schedule\n";
-		std::cout << "5. Check Schedule Changes\n";
-		std::cout << "6. Update Schedule\n";
+		std::cout << "1. Check Schedule Changes\n";
+		std::cout << "2. Update Schedule\n";
+		std::cout << "3. Delete My Schedule\n";
+		std::cout << "4. Search My Schedule\n";
+		std::cout << "5. Display All Schedule\n";
+		std::cout << "6. Display My Schedule\n";
 		std::cout << "0. Back to User Menu\n";
 		std::cout << "=========================================\n";
 
@@ -2524,22 +2522,22 @@ void studentScheduleModule(User& currentUser, Course allCourse[], int allCourseC
 
 		switch (choice) { //switch to choose function
 		case 1:
-			studentSearchSchedule(currentUser);
-			break;
-		case 2:
-			displayMySchedule(currentUser, allCourse, allCourseCount);
-			break;
-		case 3:
-			displayAllSchedules(allCourse, allCourseCount);
-			break;
-		case 4:
-			studentDeleteSchedule(currentUser);
-			break;
-		case 5:
 			checkScheduleChanges(currentUser);
 			break;
-		case 6:
+		case 2:
 			studentUpdateSchedule(currentUser);
+			break;
+		case 3:
+			studentDeleteSchedule(currentUser);
+			break;
+		case 4:
+			studentSearchSchedule(currentUser);
+			break;
+		case 5:
+			displayAllSchedules(allCourse, allCourseCount);
+			break;
+		case 6:
+			displayMySchedule(currentUser, allCourse, allCourseCount);
 			break;
 		case 0:
 			std::cout << "Returning to Student Dashboard...\n"; clearScreen();
