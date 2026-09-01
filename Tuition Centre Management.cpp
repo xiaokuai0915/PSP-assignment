@@ -3200,10 +3200,10 @@ void updatecourse() {
 				allCourse[i].Name = newname;
 				std::cout << "update the course name to " << newname << "\n";
 			}
-			bool pricevalid = true;
+			bool pricevalid = false;
 			do {
 				double newprice = intgerinputfilter("Enter the newprice :");
-
+                pricevalid=true;
 
 
 				if (newprice == -1) {
