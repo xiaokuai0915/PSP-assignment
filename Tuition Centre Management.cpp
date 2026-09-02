@@ -718,6 +718,40 @@ void searchUser() {
 	clearScreen();
 }
 
+void updateUserCourses(const std::string& oldName, const std::string& newName) { //also need to update in user_courses
+	std::ifstream infile("user_courses.txt");
+	std::string line;
+	const int MaxData = 1000; // Maximum number of users to store
+	std::string dataList[MaxData];
+	int listCount = 0;
+
+	while (std::getline(infile, line) && listCount < MaxData) {
+		size_t pos1 = line.find(',');
+
+		if (pos1 != std::string::npos) {
+			std::string currentUsername = line.substr(0, pos1);
+
+			if (currentUsername == oldName) {
+				dataList[listCount] = newName + line.substr(pos1);
+			}
+			else {
+				dataList[listCount] = line;
+			}
+		}
+		else {
+			dataList[listCount] = line;
+		}
+		listCount++;
+	}
+	infile.close();
+
+	std::ofstream outfile("user_courses.txt");
+	for (int i = 0; i < listCount; i++) {
+		outfile << dataList[i] << '\n';
+	}
+	outfile.close();
+}
+
 void updateUser(User& currentUser) {
 	std::ifstream infile("user.txt");
 	std::string username, password;
@@ -740,15 +774,17 @@ void updateUser(User& currentUser) {
 		clearScreen();
 		return;
 	}
+
 	bool found = false;
+	std::string newUsername = "";
 	while (infile >> username >> password >> role) {
 		if (username == searchUser) { //edit user
 			bool checkname;
 			do { //check username
 				checkname = false;
-				username = stringinputfilter("Enter new username (Enter 0 to cancel) : ");
+				newUsername = stringinputfilter("Enter new username (Enter 0 to cancel) : ");
 
-				if (username == "0") {
+				if (newUsername == "0") {
 					std::cout << "Updating cancelled.\n";
 					infile.close();
 					clearScreen();
@@ -759,7 +795,7 @@ void updateUser(User& currentUser) {
 				std::string fileU, fileP;
 				int fileR;
 				while (file >> fileU >> fileP >> fileR) {
-					if (username == fileU && username != searchUser) {
+					if (newUsername == fileU && newUsername != searchUser) {
 						std::cout << "Username already exist, please use another username.\n";
 						checkname = true;
 						break;
@@ -767,6 +803,8 @@ void updateUser(User& currentUser) {
 				}
 				file.close();
 			} while (checkname);
+			username = newUsername;
+
 			password = stringinputfilter("Enter new password: ");
 			do {
 				role = intgerinputfilter("Enter new role (Teacher=1, Student=0): ");
@@ -802,6 +840,10 @@ void updateUser(User& currentUser) {
 			outfile << userList[i].username << " " << userList[i].password << " " << userList[i].role << "\n";
 		}
 		outfile.close();
+
+		if (searchUser != newUsername) {
+			updateUserCourses(searchUser, newUsername);
+		}
 		std::cout << "User updated.\n";
 		clearScreen();
 	}
