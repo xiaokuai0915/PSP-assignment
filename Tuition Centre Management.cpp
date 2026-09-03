@@ -2500,7 +2500,7 @@ void ScheduleModule(User& currentUser, Course allCourse[], int& allcourseCount) 
 		std::cout << "4. Search Schedule\n";
 		std::cout << "5. Display All Schedule\n";
 		std::cout << "6. My Teaching Schedule\n";
-		std::cout << "0. Back to Main Menu\n";
+		std::cout << "0. Back to Admin Menu\n";
 		std::cout << "=========================================\n";
 
 		int choice = intgerinputfilter("Enter your choice (0-6): ");
@@ -2526,7 +2526,7 @@ void ScheduleModule(User& currentUser, Course allCourse[], int& allcourseCount) 
 			break;
 		case 0:
 			runningSchedule = false;
-			std::cout << "Reverting back to main menu...\n";
+			std::cout << "Reverting back to Admin Menu...\n";
 			clearScreen();
 			break;
 		case -2:
@@ -2581,7 +2581,7 @@ void studentScheduleModule(User& currentUser, Course allCourse[], int allCourseC
 			displayMySchedule(currentUser, allCourse, allCourseCount);
 			break;
 		case 0:
-			std::cout << "Returning to Student Dashboard...\n"; clearScreen();
+			std::cout << "Reverting back to User Menu...\n"; clearScreen();
 			break;
 		default:
 			std::cout << "[!] Invalid option. Try again.\n";
