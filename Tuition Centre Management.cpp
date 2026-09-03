@@ -2492,7 +2492,7 @@ void ScheduleModule(User& currentUser, Course allCourse[], int& allcourseCount) 
 
 	while (runningSchedule) {
 		std::cout << "\n=========================================\n";
-		std::cout << "          SCHEDULE MODULE                \n";
+		std::cout << "         ADMIN SCHEDULE MODULE                \n";
 		std::cout << "=========================================\n";
 		std::cout << "1. Add Schedule\n";
 		std::cout << "2. Update Schedule\n";
@@ -2503,8 +2503,7 @@ void ScheduleModule(User& currentUser, Course allCourse[], int& allcourseCount) 
 		std::cout << "0. Back to Main Menu\n";
 		std::cout << "=========================================\n";
 
-		int choice =
-			intgerinputfilter("Enter your choice (0-6): ");
+		int choice = intgerinputfilter("Enter your choice (0-6): ");
 
 		switch (choice) {
 		case 1:
@@ -2549,7 +2548,7 @@ void studentScheduleModule(User& currentUser, Course allCourse[], int allCourseC
 	int choice = -1;
 	while (choice != 0) {
 		std::cout << "\n=========================================\n";
-		std::cout << "            STUDENT SCHEDULE        \n";
+		std::cout << "           STUDENT SCHEDULE MODULE        \n";
 		std::cout << "=========================================\n";
 		std::cout << "1. Check Schedule Changes\n";
 		std::cout << "2. Update Schedule\n";
